@@ -1,22 +1,22 @@
 # Scalazzi compiler plugin
 
 Scalazzi Compiler Plugin
- * :white_check_mark: sufficiency checker
- * :white_check_mark: non-ambigious typeclass resolution
- * :white_check_mark: orphan instance checker
+ * [x] sufficiency checker
+ * [x] non-ambigious typeclass resolution
+ * [x] orphan instance checker
 
 Already provided by other plugins:
- * :white_check_mark: better monadic comprehensions
- * :white_check_mark: `@deriving`
- * :white_check_mark: `@newtype`
+ * [x] better monadic comprehensions
+ * [x] `@deriving`
+ * [x] `@newtype` (might consider integrating it into the plugin)
 
 TODO:
- * :x: implicit instantiation in the outermost possible scope (e.g. `Eq[List[A]]` at the same scope as `Eq[A]`)
- * :x: polymorphic values (turn `def foo[A]: F[A]` into `val _foo: F[Any] = ...; def foo[A]: F[A] = _foo.asInstanceOf[F[A]]` automatically)
- * :x: simplify functions returning propositions down to a call to `unsafe[TypeParams...]`, which will get optimized into a `val`
- * :x: `IO` and `ST` fusion
- * :x: convince Scalac that all instances of a typeclass or a proposition have the same *singleton type*
- * :x: replace `==` in pattern matching with `===`
- * :x: convince Scalac that `val x = ...; val y = x` implies `x.type = y.type`
- * :x: fix exhaustivity checking, `@exhaustive(Just, Empty)`
- * :x: require implicits to be either typeclasses or propositions
+ * [ ] require implicits to be either typeclasses or propositions
+ * [ ] implicit instantiation in the outermost possible scope (e.g. `Eq[List[A]]` at the same scope as `Eq[A]`)
+ * [ ] optimize polymorphic functions by turning `def foo[A]: F[A]` into `val _foo: F[Any] = ...; def foo[A]: F[A] = _foo.asInstanceOf[F[A]]`
+ * [ ] simplify functions returning propositions down to a call to `unsafe[TypeParams...]`, which will get optimized into a `val`
+ * [ ] `IO` and `ST` fusion
+ * [ ] convince Scalac that all instances of a typeclass or a proposition have the same *singleton type*
+ * [ ] replace `==` in pattern matching with `===`
+ * [ ] convince Scalac that `val x = ...; val y = x` implies `x.type = y.type`
+ * [ ] fix exhaustivity checking for newtypes, (`@exhaustive(Just, Empty)`?)
