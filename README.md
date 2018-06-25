@@ -1,16 +1,16 @@
 # Scalazzi compiler plugin
 
-Still somewhat buggy, especially the orphan checker. See [test/files](plugin/src/test/files) for examples.
+See [test/files](plugin/src/test/files) for examples.
 
 Scalazzi Compiler Plugin
- * [x] sufficiency checker
- * [x] non-ambigious typeclass resolution
- * [x] orphan instance checker
+ * [x] Sufficiency checker. [Example](plugin/src/test/files/neg/test_bifunctor.scala).
+ * [x] Non-ambigious typeclass resolution. [Example](plugin/src/test/files/pos/ambigious_typeclass_parameters.scala).
+ * [x] Orphan instance checker. [Example](plugin/src/test/files/neg/orphan_definitions.scala). Still somewhat buggy.
 
 Already provided by other plugins:
- * [x] better monadic comprehensions
- * [x] `@deriving`
- * [x] `@newtype` (might consider integrating it into the plugin)
+ * [x] [Better monadic comprehensions](https://github.com/oleg-py/better-monadic-for).
+ * [x] [`@deriving`](https://gitlab.com/fommil/scalaz-deriving/)
+ * [x] [`@newtype`](https://github.com/estatico/scala-newtype)
 
 TODO:
  * [ ] require implicits to be either typeclasses or propositions
