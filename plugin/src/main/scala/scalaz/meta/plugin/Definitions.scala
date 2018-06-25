@@ -21,16 +21,16 @@ abstract class Definitions {
 
   // TODO
   lazy val TypeclassClass: ClassSymbol = rootMirror.getRequiredClass("scalaz.meta.Typeclass")
-  lazy val OrphanAttr: ClassSymbol    = rootMirror.getRequiredClass("scalaz.meta.orphan")
+  lazy val OrphanAttr: ClassSymbol     = rootMirror.getRequiredClass("scalaz.meta.orphan")
 
   lazy val MinimalAttr =
     rootMirror.getClassIfDefined(TypeName("scalaz.meta.minimal")).orElse {
       val scope = newScope
       val ann = ScalazMetaPackage.moduleClass
         .newClassWithInfo(TypeName("minimal"),
-          definitions.StaticAnnotationClass.typeOfThis :: Nil,
-          scope,
-          newFlags = Flag.SYNTHETIC)
+                          definitions.StaticAnnotationClass.typeOfThis :: Nil,
+                          scope,
+                          newFlags = Flag.SYNTHETIC)
       val ctor = ann.newConstructor(NoPosition)
       val param = ctor
         .newValueParameter(TermName("defns"))
@@ -47,7 +47,7 @@ abstract class Definitions {
       Template(Nil, noSelfType, Nil)
         setSymbol NoSymbol
         setType NoType
-      )
+    )
     rootMirror.getPackageIfDefined(TermName(owner.name + name)).orElse {
       newNamer(NoContext.make(emptyTempl, owner, owner.info.decls))
         .createPackageSymbol(NoPosition, Ident(TermName(name)))

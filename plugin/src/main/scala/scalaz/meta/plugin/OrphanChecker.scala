@@ -1,17 +1,16 @@
 package scalaz.meta.plugin
 
-
-import scala.tools.nsc.transform.{Transform, TypingTransformers}
-import scala.tools.nsc.{Global, plugins}
+import scala.tools.nsc.transform.{ Transform, TypingTransformers }
+import scala.tools.nsc.{ plugins, Global }
 
 abstract class OrphanChecker extends plugins.PluginComponent with Transform with TypingTransformers {
   val global: Global
-  val scalazDefns: Definitions {val global: OrphanChecker.this.global.type}
+  val scalazDefns: Definitions { val global: OrphanChecker.this.global.type }
 
-  import global._, scalazDefns.{global => _, _}
+  import global._, scalazDefns.{ global => _, _ }
 
-  override val phaseName: String                        = "scalaz-orphans"
-  override val runsAfter: List[String]                  = "typer" :: Nil
+  override val phaseName: String       = "scalaz-orphans"
+  override val runsAfter: List[String] = "typer" :: Nil
 
   def newTransformer(unit: CompilationUnit): Transformer = new MyTransformer(unit)
 
