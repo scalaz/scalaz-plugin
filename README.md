@@ -1,5 +1,7 @@
 # Scalazzi compiler plugin
 
+Still somewhat buggy, especially the orphan checker. See [test/files](plugin/src/test/files) for examples.
+
 Scalazzi Compiler Plugin
  * [x] sufficiency checker
  * [x] non-ambigious typeclass resolution
