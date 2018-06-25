@@ -14,7 +14,6 @@ trait explicit_ambigious_typeclass_parameters {
   }
 
   // Ambigious instances for typeclasses are okay!
-  def test[F[_], A](fa: F[A])(implicit F: Traverse[F], A: Applicative[F]): F[Unit] = {
+  def test[F[_], A](fa: F[A])(implicit F: Traverse[F], A: Applicative[F]): F[Unit] =
     implicitly[Functor[F]].map(fa)(_ => ())
-  }
 }

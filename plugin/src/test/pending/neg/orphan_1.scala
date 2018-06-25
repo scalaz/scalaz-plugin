@@ -14,6 +14,6 @@ object Test {
   def foo[A](foo: Foo[A]): A = ???
 
   foo[Int](new Foo[Int] {
-    implicit val monoid: Monoid[Int] = new Monoid[Int] { } // Not good, orphan.
+    implicit val monoid: Monoid[Int] = new Monoid[Int] {} // Not good, orphan.
   })
 }

@@ -81,7 +81,7 @@ object Scalaz {
         Array()
       ),
     testOptions in Test += Tests.Argument(
-      s"""-Dpartest.scalac_opts=-Xplugin:${(packageBin in Compile in LocalProject("plugin")).value} """.trim,
-    ),
+      s"""-Dpartest.scalac_opts=-Xplugin:${(packageBin in Compile in LocalProject("plugin")).value} """.trim
+    )
   )
 }
