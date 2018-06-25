@@ -7,13 +7,13 @@ jdk:
 before_install:
 - export PATH=${PATH}:./vendor/bundle
 install:
-- rvm use 2.4.4 --install --fuzzy
-- gem update --system
-- gem install sass
-- gem install jekyll -v 3.8.2
+#- rvm use 2.4.4 --install --fuzzy
+#- gem update --system
+#- gem install sass
+#- gem install jekyll -v 3.8.2
 script:
-- sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck test example/makeMicrosite
-- if [[ "$TRAVIS_PULL_REQUEST" = "false" && "$TRAVIS_BRANCH" = "series/8.0.x" ]]; then sbt publish; fi
+- sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck test
+#- if [[ "$TRAVIS_PULL_REQUEST" = "false" && "$TRAVIS_BRANCH" = "series/8.0.x" ]]; then sbt publish; fi
 env:
   global:
   - secure: f9sDrym/MfYK1hBBSaILMxn4VCfyzJREqpuGXhEggrdZpYTNjp8GMXrqKfla3AwVAuWCveXk9u+skUYqKQ6LTG7RdQS5PzA2I9kx8afNRA5nxMmVQjuCKYM0/aF4egY5i98tGXG0NiMO3t72XuxtR+OeWLysUVB8hoNghpOOVMw=
