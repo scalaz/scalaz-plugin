@@ -26,6 +26,6 @@ object orphan_definitions {
 
   object Something {
     // This is okay, an explicit orphan.
-    @orphan implicit val foo3: Foo[String] = new Foo[String] {}
+    implicit val foo3: Foo[String] = new Foo[String] {} : @orphan
   }
 }
