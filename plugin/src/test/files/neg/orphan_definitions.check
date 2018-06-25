@@ -1,4 +1,3 @@
-error: Orphan type instance: term foo
 error: Orphan type instance: term foo1
 error: Orphan type instance: term foo2
-three errors found
+two errors found

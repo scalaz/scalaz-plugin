@@ -45,7 +45,7 @@ abstract class OrphanChecker extends plugins.PluginComponent with Transform with
 
               val enclosingModule = enclosing.companionSymbol
 
-              val nonOrphanLocations = tpe.typeConstructor.companion.termSymbol ::
+              val nonOrphanLocations = tpe.typeConstructor.typeSymbol.companion ::
                 tpe.typeArgs.map(t => t.typeSymbol.companion)
 
               val isOrphan = !nonOrphanLocations.contains(enclosingModule)
