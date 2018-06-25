@@ -1,5 +1,7 @@
 # Scalazzi compiler plugin
 
+[![Join the chat at https://gitter.im/scalaz/scalaz-plugin](https://badges.gitter.im/scalaz/scalaz-plugin.svg)](https://gitter.im/scalaz/scalaz-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 See [test/files](plugin/src/test/files) for examples.
 
 Scalazzi Compiler Plugin
