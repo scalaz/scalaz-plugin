@@ -6,16 +6,26 @@ import scala._
 object orphan_definitions {
   trait Foo[A] extends Typeclass
   object Foo {
-    implicit val foo: Foo[Int] = new Foo[Int] { } // ok
+    // This is okay, typeclass companion.
+    implicit val foo: Foo[Int] = new Foo[Int] { }
   }
 
-  implicit val foo1: Foo[Long] = new Foo[Long] { } // bad
+  class Bar
+  object Bar {
+    // This is okay, type companion.
+    implicit val foo: Foo[Bar] = new Foo[Bar] { }
+  }
+
+  // Not okay, orphan instance.
+  implicit val foo1: Foo[Long] = new Foo[Long] { }
 
   object Other {
-    implicit val foo2: Foo[String] = new Foo[String] { } // bad
+    // Not okay, orphan instance.
+    implicit val foo2: Foo[String] = new Foo[String] { }
   }
 
   object Something {
-    @orphan implicit val foo3: Foo[String] = new Foo[String] { } // ok, explicit orphan
+    // This is okay, an explicit orphan.
+    @orphan implicit val foo3: Foo[String] = new Foo[String] { }
   }
 }
