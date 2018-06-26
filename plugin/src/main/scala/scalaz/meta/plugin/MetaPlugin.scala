@@ -30,5 +30,10 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
   } with OrphanChecker
 
-  val components = List(sufficiency, orphanChecker)
+  object polymorphicFunctionOptimizer extends {
+    val global: plugin.global.type                                  = plugin.global
+    val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
+  } with PolymorphicFunctionOptimizer
+
+  val components = List(sufficiency, orphanChecker, polymorphicFunctionOptimizer)
 }
