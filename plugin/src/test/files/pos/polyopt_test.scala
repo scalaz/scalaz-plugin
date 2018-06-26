@@ -7,4 +7,3 @@ object FooBar {
 
   def get1[A](a: A): List[A] = List(a)
 }
-

@@ -8,7 +8,7 @@ object eq_contramap {
     def contramap[B](f: B => A): Eq[B]
   }
   object Eq {
-    val eqInt: Eq[Int] = ???
+    val eqInt: Eq[Int]   = ???
     val eqLong: Eq[Long] = eqInt.contramap(_.toInt) // ok
   }
 

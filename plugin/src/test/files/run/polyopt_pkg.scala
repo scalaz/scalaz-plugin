@@ -10,16 +10,17 @@ package test {
   }
 }
 
-
-import java.io.{BufferedReader, InputStreamReader, File}
+import java.io.{ BufferedReader, File, InputStreamReader }
 
 object Test {
   def main(args: Array[String]): Unit = {
     val path = new File("src/test/files/run/polyopt_pkg-run.obj/test/package$.class").getAbsolutePath
 
-    val p = new ProcessBuilder().command("javap", "-c", path)
+    val p = new ProcessBuilder()
+      .command("javap", "-c", path)
       .redirectOutput(ProcessBuilder.Redirect.INHERIT)
       .redirectError(ProcessBuilder.Redirect.INHERIT)
-      .start().waitFor()
+      .start()
+      .waitFor()
   }
 }

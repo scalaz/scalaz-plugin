@@ -1,4 +1,3 @@
-
 //object Foo {
 //  val value: List[Any] = Nil
 //  def get[A]: List[A] = value.asInstanceOf[List[A]]
@@ -13,5 +12,3 @@ object FooBar {
 
   def get1[A](a: A): List[A] = List(a)
 }
-
-

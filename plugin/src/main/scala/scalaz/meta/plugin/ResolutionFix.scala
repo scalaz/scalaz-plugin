@@ -18,13 +18,15 @@ abstract class ResolutionFix {
   final class NewAnalyzer extends {
     val global: ResolutionFix.this.global.type = ResolutionFix.this.global
   } with Analyzer {
-    override def inferImplicit(tree: Tree,
-                               pt: Type,
-                               reportAmbiguous: Boolean,
-                               isView: Boolean,
-                               context: Context,
-                               saveAmbiguousDivergent: Boolean,
-                               pos: Position): SearchResult =
+    override def inferImplicit(
+      tree: Tree,
+      pt: Type,
+      reportAmbiguous: Boolean,
+      isView: Boolean,
+      context: Context,
+      saveAmbiguousDivergent: Boolean,
+      pos: Position
+    ): SearchResult =
       if (pt <:< scalazDefns.TypeclassClass.tpe) {
         // Note that the isInvalidConversionTarget seems to make a lot more sense right here, before all the
         // work is performed, than at the point where it presently exists.
@@ -54,16 +56,14 @@ abstract class ResolutionFix {
     val cls   = implicitly[ClassTag[T]].runtimeClass
     val field = cls.getDeclaredField(name)
     field.setAccessible(true)
-    (t, u) =>
-      field.set(t, u)
+    (t, u) => field.set(t, u)
   }
 
   def valGetter[T: ClassTag, U](name: String): T => U = {
     val cls   = implicitly[ClassTag[T]].runtimeClass
     val field = cls.getDeclaredField(name)
     field.setAccessible(true)
-    t =>
-      field.get(t).asInstanceOf[U]
+    t => field.get(t).asInstanceOf[U]
   }
 
   def getGlobalPhasesSet =
