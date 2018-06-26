@@ -1,3 +1,7 @@
-error: Orphan type instance: term foo1
-error: Orphan type instance: term foo2
+orphan_definitions.scala:20: error: Orphan instance.
+  implicit val foo1: Foo[Long] = new Foo[Long] {} // bad
+                                     ^
+orphan_definitions.scala:24: error: Orphan instance.
+    implicit val foo2: Foo[String] = new Foo[String] {} // bad
+                                         ^
 two errors found

@@ -1,0 +1,4 @@
+orphan_1.scala:17: error: Orphan instance.
+    implicit val monoid: Monoid[Int] = new Monoid[Int] {} // Not good, orphan.
+                                           ^
+one error found
