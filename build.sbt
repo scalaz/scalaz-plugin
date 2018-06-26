@@ -19,6 +19,7 @@ def partestDesc(in: String): Def.Initialize[Task[(Result[Unit], String)]] =
   partestOnly(in).result map (_ -> s"partest $in")
 
 lazy val testPending = taskKey[Unit]("Run all pending tests.")
+lazy val testVerbose = taskKey[Unit]("Run all tests with --verbose.")
 
 lazy val plugin = (project in file("plugin"))
   .settings(
@@ -31,6 +32,8 @@ lazy val plugin = (project in file("plugin"))
   )
   .settings(partestFramework, testPending := {
     partestDesc("--srcpath pending").value
+  }, testVerbose := {
+    partestDesc("--verbose").value
   })
   .dependsOn(metaJVM)
 

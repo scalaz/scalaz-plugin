@@ -1,0 +1,4 @@
+eq_contramap.scala:15: error: Non-propositional expression involving typeclasses.
+  val eqLonger: Eq[Long] = Eq.eqInt.contramap(_.toInt)
+                                             ^
+one error found

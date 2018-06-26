@@ -1,0 +1,4 @@
+orphan_2.scala:12: error: Orphan instance.
+  foo(new Monoid[Int] { }) // Bad, an orphan.
+          ^
+one error found
