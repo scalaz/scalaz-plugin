@@ -14,7 +14,7 @@ import java.io.{ BufferedReader, File, InputStreamReader }
 
 object Test {
   def main(args: Array[String]): Unit = {
-    val path = new File("src/test/files/run/polyopt_pkg-run.obj/test/package$.class").getAbsolutePath
+    val path = new File("src/test/pending/run/polyopt_pkg-run.obj/test/package$.class").getAbsolutePath
 
     val p = new ProcessBuilder()
       .command("javap", "-c", path)
