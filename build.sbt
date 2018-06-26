@@ -31,7 +31,7 @@ lazy val plugin = (project in file("plugin"))
     )
   )
   .settings(partestFramework, testPending := {
-    partestDesc("--srcpath pending").value
+    partestDesc("--verbose --srcpath pending").value
   }, testVerbose := {
     partestDesc("--verbose").value
   })

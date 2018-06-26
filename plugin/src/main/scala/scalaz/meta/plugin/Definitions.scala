@@ -29,10 +29,12 @@ abstract class Definitions {
     rootMirror.getClassIfDefined(TypeName("scalaz.meta.minimal")).orElse {
       val scope = newScope
       val ann = ScalazMetaPackage.moduleClass
-        .newClassWithInfo(TypeName("minimal"),
-                          definitions.StaticAnnotationClass.typeOfThis :: Nil,
-                          scope,
-                          newFlags = Flag.SYNTHETIC)
+        .newClassWithInfo(
+          TypeName("minimal"),
+          definitions.StaticAnnotationClass.typeOfThis :: Nil,
+          scope,
+          newFlags = Flag.SYNTHETIC
+        )
       val ctor = ann.newConstructor(NoPosition)
       val param = ctor
         .newValueParameter(TermName("defns"))

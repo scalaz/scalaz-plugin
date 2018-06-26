@@ -18,13 +18,15 @@ abstract class ResolutionFix {
   final class NewAnalyzer extends {
     val global: ResolutionFix.this.global.type = ResolutionFix.this.global
   } with Analyzer {
-    override def inferImplicit(tree: Tree,
-                               pt: Type,
-                               reportAmbiguous: Boolean,
-                               isView: Boolean,
-                               context: Context,
-                               saveAmbiguousDivergent: Boolean,
-                               pos: Position): SearchResult =
+    override def inferImplicit(
+      tree: Tree,
+      pt: Type,
+      reportAmbiguous: Boolean,
+      isView: Boolean,
+      context: Context,
+      saveAmbiguousDivergent: Boolean,
+      pos: Position
+    ): SearchResult =
       if (pt <:< scalazDefns.TypeclassClass.tpe) {
         // Note that the isInvalidConversionTarget seems to make a lot more sense right here, before all the
         // work is performed, than at the point where it presently exists.

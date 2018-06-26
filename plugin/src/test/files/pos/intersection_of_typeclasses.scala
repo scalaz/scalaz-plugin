@@ -1,4 +1,4 @@
-import scalaz.meta.{Typeclass, minimal}
+import scalaz.meta.{ minimal, Typeclass }
 
 trait Functor[F[_]] extends Typeclass {
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -41,5 +41,5 @@ object Test {
   def test[F[_]: Traverse: Applicative, A](fa: F[A]): F[Unit] =
     implicitly[Functor[F]].map(fa)(_ => ())
 
-  val x= test(Id(1))
+  val x = test(Id(1))
 }
