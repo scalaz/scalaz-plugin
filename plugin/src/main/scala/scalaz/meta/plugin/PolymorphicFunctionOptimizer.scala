@@ -19,10 +19,9 @@ abstract class PolymorphicFunctionOptimizer
   override val phaseName: String       = "scalaz-polyopt"
   override val runsAfter: List[String] = "typer" :: Nil
 
-  def newTransformer(unit: CompilationUnit): Transformer = {
+  def newTransformer(unit: CompilationUnit): Transformer =
 //    treeBrowsers.create().browse("aa", List(unit))
     new MyTransformer(unit)
-  }
 
   def replaceTree[T <: Tree](prev: Tree, next: T): T =
     atPos(prev.pos.makeTransparent)(next)
@@ -56,24 +55,26 @@ abstract class PolymorphicFunctionOptimizer
                   if (usedTypeParams.isEmpty) {
                     val name1 = freshTermName("local$")(currentFreshNameCreator)
                     val tpt1  = tpt.substituteTypes(tparams.map(_.symbol), tparams.map(_ => definitions.AnyTpe))
-                    val rhs1 = rhs.substituteTypes(tparams.map(_.symbol), tparams.map(_ => definitions.AnyTpe))
+                    val rhs1  = rhs.substituteTypes(tparams.map(_.symbol), tparams.map(_ => definitions.AnyTpe))
                     import scala.tools.nsc.symtab.Flags._
 
-                    val val1_symbol = mod.symbol.moduleClass.newTermSymbol(name1, rhs.pos, FINAL|LOCAL|SYNTHETIC).setInfo(tpt1.tpe)
+                    val val1_symbol = mod.symbol.moduleClass
+                      .newTermSymbol(name1, rhs.pos, FINAL | LOCAL | SYNTHETIC)
+                      .setInfoAndEnter(tpt1.tpe)
 
                     val val1 = newValDef(val1_symbol, rhs1)(Modifiers(0), name1, tpt1)
 
-                    val fun1 = treeCopy.DefDef(fun,
-                                               fun.mods,
-                                               fun.name,
-                                               fun.tparams,
-                                               fun.vparamss,
-                                               fun.tpt,
-                      TypeApply(Select(Select(This(mod.symbol.moduleClass), val1_symbol), "asInstanceOf"), List(tpt)))
+                    val fun1 = treeCopy.DefDef(
+                      fun,
+                      fun.mods,
+                      fun.name,
+                      fun.tparams,
+                      fun.vparamss,
+                      fun.tpt,
+                      TypeApply(Select(Select(This(mod.symbol.moduleClass), val1_symbol), "asInstanceOf"), List(tpt))
+                    )
 
-                    List(
-                      localTyper.typedValDef(val1),
-                      localTyper.typedDefDef(fun1))
+                    List(localTyper.typedValDef(val1), localTyper.typedDefDef(fun1))
                   } else List(fun)
                 case x => List(x)
               }
