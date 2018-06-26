@@ -56,14 +56,16 @@ abstract class ResolutionFix {
     val cls   = implicitly[ClassTag[T]].runtimeClass
     val field = cls.getDeclaredField(name)
     field.setAccessible(true)
-    (t, u) => field.set(t, u)
+    (t, u) =>
+      field.set(t, u)
   }
 
   def valGetter[T: ClassTag, U](name: String): T => U = {
     val cls   = implicitly[ClassTag[T]].runtimeClass
     val field = cls.getDeclaredField(name)
     field.setAccessible(true)
-    t => field.get(t).asInstanceOf[U]
+    t =>
+      field.get(t).asInstanceOf[U]
   }
 
   def getGlobalPhasesSet =
