@@ -9,8 +9,8 @@ object eq_contramap {
   }
   object Eq {
     val eqInt: Eq[Int] = ???
-    val eqLong: Eq[Long] = eqInt.contramap(_.toInt)
+    val eqLong: Eq[Long] = eqInt.contramap(_.toInt) // ok
   }
 
-  val eqLonger: Eq[Long] = Eq.eqInt.contramap(_.toInt)
+  val eqLonger: Eq[Long] = Eq.eqInt.contramap(_.toInt) // bad
 }
