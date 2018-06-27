@@ -12,29 +12,14 @@ lazy val meta = crossProject.module
 lazy val metaJVM = meta.jvm
 lazy val metaJS  = meta.js
 
-def partestOnly(in: String): Def.Initialize[Task[Unit]] =
-  (testOnly in Test).toTask(" -- " + in)
-
-def partestDesc(in: String): Def.Initialize[Task[(Result[Unit], String)]] =
-  partestOnly(in).result map (_ -> s"partest $in")
-
-lazy val testPending = taskKey[Unit]("Run all pending tests.")
-lazy val testVerbose = taskKey[Unit]("Run all tests with --verbose.")
-
 lazy val plugin = (project in file("plugin"))
   .settings(
     crossVersion := CrossVersion.full,
     libraryDependencies ++= List(
-      scalaOrganization.value               % "scala-reflect" % scalaVersion.value % Provided,
-      scalaOrganization.value               % "scala-compiler" % scalaVersion.value % Provided,
-      partestDependency(scalaVersion.value) % Test
+      scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
     )
   )
-  .settings(partestFramework, testPending := {
-    partestDesc("--verbose --srcpath pending").value
-  }, testVerbose := {
-    partestDesc("--verbose").value
-  })
   .dependsOn(metaJVM)
 
 lazy val PluginDependency: List[Def.Setting[_]] = List(scalacOptions ++= {
@@ -47,6 +32,19 @@ lazy val example = crossProject.module
   .settings(publishArtifact := false, skip in publish := true)
   .dependsOn(meta)
   .settings(PluginDependency: _*)
+
+lazy val tests = (project in file ("test"))
+  .dependsOn(plugin)
+  .settings(
+    partestFramework,
+    libraryDependencies ++= List(
+      scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
+      partestDependency(scalaVersion.value) % Test,
+    ),
+  )
+
+commands in Global += Commandz.partestCommand(baseDirectory.value)
 
 lazy val exampleJVM = example.jvm
 lazy val exampleJS  = example.js
