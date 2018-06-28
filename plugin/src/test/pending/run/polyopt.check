@@ -1,4 +1,4 @@
-Compiled from "polyopt_test.scala"
+Compiled from "polyopt.scala"
 public final class FooBar$ {
   public static FooBar$ MODULE$;
 
@@ -35,4 +35,75 @@ public final class FooBar$ {
       14: invokevirtual #42                 // Method scala/Predef$.genericWrapArray:(Ljava/lang/Object;)Lscala/collection/mutable/WrappedArray;
       17: invokevirtual #46                 // Method scala/collection/immutable/List$.apply:(Lscala/collection/Seq;)Lscala/collection/immutable/List;
       20: areturn
+}
+Compiled from "polyopt.scala"
+public final class ChildObj$ extends Parent<java.lang.String> {
+  public static ChildObj$ MODULE$;
+
+  public final Foo<java.lang.String> local$2;
+
+  public static {};
+    Code:
+       0: new           #2                  // class ChildObj$
+       3: invokespecial #16                 // Method "<init>":()V
+       6: return
+
+  public final <X> Foo<java.lang.String> someFunc();
+    Code:
+       0: aload_0
+       1: getfield      #20                 // Field local$2:LFoo;
+       4: areturn
+}
+Compiled from "polyopt.scala"
+public final class ChildObjRedef$ extends Parent<java.lang.String> {
+  public static ChildObjRedef$ MODULE$;
+
+  public final Foo<java.lang.String> local$3;
+
+  public static {};
+    Code:
+       0: new           #2                  // class ChildObjRedef$
+       3: invokespecial #18                 // Method "<init>":()V
+       6: return
+
+  public int a();
+    Code:
+       0: aload_0
+       1: getfield      #21                 // Field a:I
+       4: ireturn
+
+  public <X> Foo<java.lang.String> someFunc();
+    Code:
+       0: aload_0
+       1: getfield      #26                 // Field local$3:LFoo;
+       4: areturn
+}
+Compiled from "polyopt.scala"
+public final class TestStatic$$anon$1 extends Parent<java.lang.String> {
+  public final Foo<java.lang.String> local$4;
+
+  public int a();
+    Code:
+       0: aload_0
+       1: getfield      #16                 // Field a:I
+       4: ireturn
+
+  public final <X> Foo<java.lang.String> someFunc();
+    Code:
+       0: aload_0
+       1: getfield      #22                 // Field local$4:LFoo;
+       4: areturn
+
+  public TestStatic$$anon$1();
+    Code:
+       0: aload_0
+       1: invokespecial #26                 // Method Parent."<init>":()V
+       4: aload_0
+       5: iconst_1
+       6: putfield      #16                 // Field a:I
+       9: aload_0
+      10: aload_0
+      11: invokespecial #28                 // Method Parent.someFunc:()LFoo;
+      14: putfield      #22                 // Field local$4:LFoo;
+      17: return
 }
