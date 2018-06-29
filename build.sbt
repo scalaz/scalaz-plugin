@@ -35,6 +35,7 @@ lazy val example = crossProject.module
 
 lazy val tests = (project in file("test"))
   .dependsOn(plugin)
+  .settings(publishArtifact := false, skip in publish := true)
   .settings(
     partestFramework,
     libraryDependencies ++= List(
