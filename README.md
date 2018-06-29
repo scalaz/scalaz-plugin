@@ -30,9 +30,9 @@ if (a === b) {
 
 ## What does this plugin do?
 
- * [x] Sufficiency checker. [Example](plugin/src/test/files/neg/test_bifunctor.scala).
- * [x] Non-ambigious typeclass resolution. [Example](plugin/src/test/files/pos/ambigious_typeclass_parameters.scala).
- * [x] Orphan instance checker. [Some](plugin/src/test/files/neg/orphan_definitions.scala) [examples](plugin/src/test/files/neg/eq_contramap.scala).
+ * [x] Sufficiency checker. [Example](test/files/neg/test_bifunctor.scala).
+ * [x] Non-ambigious typeclass resolution. [Example](test/files/pos/ambigious_typeclass_parameters.scala).
+ * [x] Orphan instance checker. [Some](test/files/neg/orphan_definitions.scala) [examples](test/files/neg/eq_contramap.scala).
  * [x] [Polymorphic function optimization](doc/PolymorphicFunctionOptimization.md).
 
 See [test/files](plugin/src/test/files) for more examples. We would like to get a lot more things done eventually, see open Issues.
