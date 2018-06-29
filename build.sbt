@@ -17,7 +17,7 @@ lazy val plugin = (project in file("plugin"))
     crossVersion := CrossVersion.full,
     libraryDependencies ++= List(
       scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
-      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
     )
   )
   .dependsOn(metaJVM)
@@ -40,8 +40,8 @@ lazy val tests = (project in file("test"))
     libraryDependencies ++= List(
       scalaOrganization.value               % "scala-reflect" % scalaVersion.value % Provided,
       scalaOrganization.value               % "scala-compiler" % scalaVersion.value % Provided,
-      partestDependency(scalaVersion.value) % Test,
-    ),
+      partestDependency(scalaVersion.value) % Test
+    )
   )
 
 commands in Global += Commandz.partestCommand(baseDirectory.value)
@@ -52,5 +52,5 @@ lazy val exampleJS  = example.js
 lazy val root = project
   .in(file("."))
   .settings(publishArtifact := false, skip in publish := true)
-  .aggregate(metaJS, metaJVM, plugin, exampleJS, exampleJVM)
+  .aggregate(metaJS, metaJVM, plugin, exampleJS, exampleJVM, tests)
   .enablePlugins(ScalaJSPlugin)

@@ -4,11 +4,11 @@ import internal.util.complete._
 object Commandz {
 
   /** A command to invoke our partest, assuming that the tests live in the
-    * given directory.
-    *
-    * This is shorter than I remember the scala build's being, and I didn't look
-    * at that one while writing it, so it is presumably much lacking in features.
-    */
+   * given directory.
+   *
+   * This is shorter than I remember the scala build's being, and I didn't look
+   * at that one while writing it, so it is presumably much lacking in features.
+   */
   def partestCommand(base: File): Command = {
     import DefaultParsers._
 
@@ -28,8 +28,8 @@ object Commandz {
             val f = file(base.getName + pre) / s
             (categories contains f.getParentFile.getName) && (
               (f.isDirectory && !(f.getName endsWith ".obj"))
-                || f.getName.endsWith(".scala")
-              )
+              || f.getName.endsWith(".scala")
+            )
           }
       }
       new Custom("")
@@ -40,26 +40,28 @@ object Commandz {
       .map(new File(_))
 
     def scalac_opts(s: String) =
-      "\"-Dpartest.scalac_opts=" + s.replace("\"","\\\"") + '"'
+      "\"-Dpartest.scalac_opts=" + s.replace("\"", "\\\"") + '"'
 
-    val partestArg = List.apply[Parser[String]](
-      ( "-Dpartest.scalac_opts=" ~> StringBasic.examples()).map(scalac_opts),
-      category,
-      ("--" ~> category).map("--" ++ _),
-      "--update-check".id,
-      "--verbose".id,
-      "--srcpath pending".id, // expand?
-      testfile.map(_.getAbsolutePath), // must be last
-    ).reduce(_ | _)
+    val partestArg = List
+      .apply[Parser[String]](
+        ("-Dpartest.scalac_opts=" ~> StringBasic.examples()).map(scalac_opts),
+        category,
+        ("--" ~> category).map("--" ++ _),
+        "--update-check".id,
+        "--verbose".id,
+        "--srcpath pending".id,          // expand?
+        testfile.map(_.getAbsolutePath) // must be last
+      )
+      .reduce(_ | _)
 
-    Command("partest")(const((token(Space) ~> partestArg) *)) {
-      (state, args) =>
-        {
-          val res = if (args.isEmpty) "tests/test:test"
+    Command("partest")(const((token(Space) ~> partestArg) *)) { (state, args) =>
+      {
+        val res =
+          if (args.isEmpty) "tests/test:test"
           else s"tests/test:testOnly -- ${args mkString " "}"
-      println(s"invoking $res")
-      res
-    } :: state
+        println(s"invoking $res")
+        res
+      } :: state
     }
   }
 

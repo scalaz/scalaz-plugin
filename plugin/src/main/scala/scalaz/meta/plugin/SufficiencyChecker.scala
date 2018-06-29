@@ -39,8 +39,10 @@ abstract class SufficiencyChecker extends plugins.PluginComponent {
                       sym.info.member(name) match {
                         case NoSymbol =>
                           // we *should* have caught this!
-                          devWarning(sym.pos,
-                                     s"Base $b requires a method named $name but none exists!")
+                          devWarning(
+                            sym.pos,
+                            s"Base $b requires a method named $name but none exists!"
+                          )
                           None
                         case found =>
                           if (found.owner eq b)

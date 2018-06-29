@@ -98,9 +98,13 @@ abstract class PolymorphicFunctionOptimizer
         .newTermSymbol(valName, owner.pos, FINAL | LOCAL | SYNTHETIC)
         .setInfoAndEnter(valType)
 
-      val t1 = Select(TypeApply(Select(Super(This(owner), fun.owner.asType.name), fun),
-                                fun.typeParams.map(_ => TypeTree(definitions.AnyTpe))),
-                      "asInstanceOf")
+      val t1 = Select(
+        TypeApply(
+          Select(Super(This(owner), fun.owner.asType.name), fun),
+          fun.typeParams.map(_ => TypeTree(definitions.AnyTpe))
+        ),
+        "asInstanceOf"
+      )
 
       val valRHSTree = TypeApply(t1, List(TypeTree(valType)))
 
@@ -111,8 +115,10 @@ abstract class PolymorphicFunctionOptimizer
         .setInfoAndEnter(fun.tpe)
 
       val defRHSTree =
-        TypeApply(Select(Select(This(owner), valSymbol), "asInstanceOf"),
-                  List(TypeTree(defType.finalResultType)))
+        TypeApply(
+          Select(Select(This(owner), valSymbol), "asInstanceOf"),
+          List(TypeTree(defType.finalResultType))
+        )
 
       val defTree = newDefDef(defSymbol, defRHSTree)()
 
@@ -178,8 +184,8 @@ abstract class PolymorphicFunctionOptimizer
                 s.asMethod.typeParams.nonEmpty && s.asMethod.paramLists.isEmpty &&
                 !tmplOverrides.contains(s.asMethod) =>
             List(
-              s.asMethod.substInfo(p.tpe.typeConstructor.typeParams,
-                                   p.tpe.typeArgs.map(_.typeSymbol))
+              s.asMethod
+                .substInfo(p.tpe.typeConstructor.typeParams, p.tpe.typeArgs.map(_.typeSymbol))
             )
           case _ => List()
         }
