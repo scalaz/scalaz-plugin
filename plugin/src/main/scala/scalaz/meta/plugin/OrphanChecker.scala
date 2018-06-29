@@ -5,7 +5,10 @@ import scala.tools.nsc.transform.{ Transform, TypingTransformers }
 import scala.tools.nsc.{ plugins, Global }
 import scala.util.control.NonFatal
 
-abstract class OrphanChecker extends plugins.PluginComponent with Transform with TypingTransformers {
+abstract class OrphanChecker
+    extends plugins.PluginComponent
+    with Transform
+    with TypingTransformers {
   val global: Global
   val scalazDefns: Definitions { val global: OrphanChecker.this.global.type }
 
@@ -29,7 +32,9 @@ abstract class OrphanChecker extends plugins.PluginComponent with Transform with
         val dealiased = tpe.dealias
         dealiased match {
           case TypeRef(pre, sym, args) if sym.isAnonymousClass && sym.hasCompleteInfo =>
-            nonOrphanLocations(RefinedType(sym.asClass.info.parents.filterNot(_ =:= AnyRefTpe), EmptyScope))
+            nonOrphanLocations(
+              RefinedType(sym.asClass.info.parents.filterNot(_ =:= AnyRefTpe), EmptyScope)
+            )
           case RefinedType(parents, decls) =>
             parents.flatMap(t => nonOrphanLocations(t))
           case TypeRef(pre, sym, args) =>

@@ -89,7 +89,8 @@ abstract class PolymorphicFunctionOptimizer
       val defType = fun.typeSignature
 
       val valType =
-        defType.finalResultType.substituteTypes(defType.typeParams, defType.typeParams.map(_ => definitions.AnyTpe))
+        defType.finalResultType
+          .substituteTypes(defType.typeParams, defType.typeParams.map(_ => definitions.AnyTpe))
 
       import scala.tools.nsc.symtab.Flags._
 
@@ -97,9 +98,13 @@ abstract class PolymorphicFunctionOptimizer
         .newTermSymbol(valName, owner.pos, FINAL | LOCAL | SYNTHETIC)
         .setInfoAndEnter(valType)
 
-      val t1 = Select(TypeApply(Select(Super(This(owner), fun.owner.asType.name), fun),
-                                fun.typeParams.map(_ => TypeTree(definitions.AnyTpe))),
-                      "asInstanceOf")
+      val t1 = Select(
+        TypeApply(
+          Select(Super(This(owner), fun.owner.asType.name), fun),
+          fun.typeParams.map(_ => TypeTree(definitions.AnyTpe))
+        ),
+        "asInstanceOf"
+      )
 
       val valRHSTree = TypeApply(t1, List(TypeTree(valType)))
 
@@ -110,7 +115,10 @@ abstract class PolymorphicFunctionOptimizer
         .setInfoAndEnter(fun.tpe)
 
       val defRHSTree =
-        TypeApply(Select(Select(This(owner), valSymbol), "asInstanceOf"), List(TypeTree(defType.finalResultType)))
+        TypeApply(
+          Select(Select(This(owner), valSymbol), "asInstanceOf"),
+          List(TypeTree(defType.finalResultType))
+        )
 
       val defTree = newDefDef(defSymbol, defRHSTree)()
 
@@ -175,7 +183,10 @@ abstract class PolymorphicFunctionOptimizer
               if s.isMethod && !s.isFinal && !s.isConstructor &&
                 s.asMethod.typeParams.nonEmpty && s.asMethod.paramLists.isEmpty &&
                 !tmplOverrides.contains(s.asMethod) =>
-            List(s.asMethod.substInfo(p.tpe.typeConstructor.typeParams, p.tpe.typeArgs.map(_.typeSymbol)))
+            List(
+              s.asMethod
+                .substInfo(p.tpe.typeConstructor.typeParams, p.tpe.typeArgs.map(_.typeSymbol))
+            )
           case _ => List()
         }
       }
@@ -186,7 +197,9 @@ abstract class PolymorphicFunctionOptimizer
         tmpl.self,
         body.flatMap {
           case fun @ DefDef(mods, name, tparams, vparamss, tpt, rhs)
-              if !mods.isSynthetic && !fun.symbol.isConstructor && !fun.symbol.isAccessor && !isSelect(rhs) =>
+              if !mods.isSynthetic && !fun.symbol.isConstructor && !fun.symbol.isAccessor && !isSelect(
+                rhs
+              ) =>
             if (tparams.nonEmpty && vparamss.isEmpty) {
               rewriteMethod(owner, fun)
             } else List(fun)
@@ -202,9 +215,14 @@ abstract class PolymorphicFunctionOptimizer
       try {
         tree match {
           case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _)) if isStaticScope(cd.symbol) =>
-            super.transform(treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl)))
+            super.transform(
+              treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl))
+            )
           case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _)) if isStaticScope(mod.symbol) =>
-            super.transform(treeCopy.ModuleDef(tree, mod.mods, mod.name, processBody(mod.symbol.moduleClass, tmpl)))
+            super.transform(
+              treeCopy
+                .ModuleDef(tree, mod.mods, mod.name, processBody(mod.symbol.moduleClass, tmpl))
+            )
           case _ => super.transform(tree)
         }
       } catch {

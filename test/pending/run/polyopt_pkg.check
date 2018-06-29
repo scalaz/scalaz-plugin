@@ -1,0 +1,38 @@
+Compiled from "polyopt_pkg.scala"
+public final class test.package$ {
+  public static test.package$ MODULE$;
+
+  public final Foo<java.lang.Object> local$1;
+
+  public static {};
+    Code:
+       0: new           #2                  // class test/package$
+       3: invokespecial #17                 // Method "<init>":()V
+       6: return
+
+  public int boo();
+    Code:
+       0: aload_0
+       1: getfield      #20                 // Field boo:I
+       4: ireturn
+
+  public <A> Foo<A> get();
+    Code:
+       0: aload_0
+       1: getfield      #25                 // Field local$1:LFoo;
+       4: areturn
+
+  public <A> scala.collection.immutable.List<A> get1(A);
+    Code:
+       0: getstatic     #33                 // Field scala/collection/immutable/List$.MODULE$:Lscala/collection/immutable/List$;
+       3: getstatic     #38                 // Field scala/Predef$.MODULE$:Lscala/Predef$;
+       6: iconst_1
+       7: anewarray     #4                  // class java/lang/Object
+      10: dup
+      11: iconst_0
+      12: aload_1
+      13: aastore
+      14: invokevirtual #42                 // Method scala/Predef$.genericWrapArray:(Ljava/lang/Object;)Lscala/collection/mutable/WrappedArray;
+      17: invokevirtual #46                 // Method scala/collection/immutable/List$.apply:(Lscala/collection/Seq;)Lscala/collection/immutable/List;
+      20: areturn
+}
