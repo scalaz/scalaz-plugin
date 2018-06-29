@@ -35,7 +35,7 @@ if (a === b) {
  * [x] Orphan instance checker. [Some](test/files/neg/orphan_definitions.scala) [examples](test/files/neg/eq_contramap.scala).
  * [x] [Polymorphic function optimization](doc/PolymorphicFunctionOptimization.md).
 
-See [test/files](plugin/src/test/files) for more examples. We would like to get a lot more things done eventually, see open Issues.
+See [test/files](test/files) for more examples. We would like to get a lot more things done eventually, see open issues.
 
 ---
 
