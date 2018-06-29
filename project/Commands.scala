@@ -49,7 +49,7 @@ object Commandz {
         ("--" ~> category).map("--" ++ _),
         "--update-check".id,
         "--verbose".id,
-        "--srcpath pending".id,          // expand?
+        "--srcpath pending".id, // expand?
         testfile.map(_.getAbsolutePath) // must be last
       )
       .reduce(_ | _)
