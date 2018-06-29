@@ -32,7 +32,9 @@ object Id {
         Id(())
       override def product[A, B](fa: Id[A], fb: Id[B]): Id[(A, B)] =
         Id((fa.value, fb.value))
-      override def traverse[G[_], A, B](fa: Id[A])(f: A => G[B])(implicit G: Applicative[G]): G[Id[B]] =
+      override def traverse[G[_], A, B](
+        fa: Id[A]
+      )(f: A => G[B])(implicit G: Applicative[G]): G[Id[B]] =
         G.map(f(fa.value))(Id.apply)
     }
 }

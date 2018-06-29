@@ -33,13 +33,13 @@ lazy val example = crossProject.module
   .dependsOn(meta)
   .settings(PluginDependency: _*)
 
-lazy val tests = (project in file ("test"))
+lazy val tests = (project in file("test"))
   .dependsOn(plugin)
   .settings(
     partestFramework,
     libraryDependencies ++= List(
-      scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
-      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
+      scalaOrganization.value               % "scala-reflect" % scalaVersion.value % Provided,
+      scalaOrganization.value               % "scala-compiler" % scalaVersion.value % Provided,
       partestDependency(scalaVersion.value) % Test,
     ),
   )

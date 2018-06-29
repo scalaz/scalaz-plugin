@@ -32,7 +32,8 @@ abstract class ResolutionFix {
         // work is performed, than at the point where it presently exists.
         val shouldPrint = printTypings && context.undetparams.nonEmpty
         if (shouldPrint)
-          typingStack.printTyping(tree, "typing typeclass: %s %s".format(tree, context.undetparamsString))
+          typingStack.printTyping(tree,
+                                  "typing typeclass: %s %s".format(tree, context.undetparamsString))
         val implicitSearchContext = context.makeImplicit(reportAmbiguous)
 
         val search = new ImplicitSearch(tree, pt, isView, implicitSearchContext, pos)

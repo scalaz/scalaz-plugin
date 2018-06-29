@@ -14,14 +14,14 @@ object FooBar {
 }
 
 class Parent[A] {
-  def someFunc[X]: Foo[A] = new Foo[A]
+  def someFunc[X]: Foo[A]            = new Foo[A]
   final def someFinalFunc[X]: Foo[A] = new Foo[A]
 }
 
 object ChildObj extends Parent[String]
 
 object ChildObjRedef extends Parent[String] {
-  val a = 1
+  val a                                 = 1
   override def someFunc[X]: Foo[String] = new Foo[String]
 }
 
@@ -33,7 +33,7 @@ object TestStatic {
 
   // List(value foo, object TestStatic, package <empty>, package <root>)
   def boo(p: Parent[String]): Unit = ???
-  val foo1 = boo(new Parent[String] { })
+  val foo1                         = boo(new Parent[String] {})
 
   class Test {
     val boo = new Parent[String] {
@@ -43,7 +43,7 @@ object TestStatic {
     object Bad
   }
 
-  var VarIsNotStatic  = new Parent[String] {
+  var VarIsNotStatic = new Parent[String] {
     val a = 1
   }
 
