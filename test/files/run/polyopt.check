@@ -1,0 +1,107 @@
+// class version 52.0 (52)
+// access flags 0x31
+public final class FooBar$ {
+
+  // compiled from: newSource1.scala
+
+  ATTRIBUTE Scala : unknown
+
+  ATTRIBUTE ScalaInlineInfo : unknown
+
+  // access flags 0x9
+  public static LFooBar$; MODULE$
+
+  // access flags 0x12
+  private final I boo
+
+  // access flags 0x11
+  // signature LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object>
+  public final LFoo; local$1
+
+  // access flags 0x9
+  public static <clinit>()V
+    NEW FooBar$
+    INVOKESPECIAL FooBar$.<init> ()V
+    RETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public boo()I
+   L0
+    LINENUMBER 10 L0
+    ALOAD 0
+    GETFIELD FooBar$.boo : I
+    IRETURN
+   L1
+    LOCALVARIABLE this LFooBar$; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x1
+  // signature <A:Ljava/lang/Object;>()LFoo<TA;>;
+  // declaration: Foo<A> get<A>()
+  public get()LFoo;
+   L0
+    ALOAD 0
+    GETFIELD FooBar$.local$1 : LFoo;
+    ARETURN
+   L1
+    LOCALVARIABLE this LFooBar$; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x1
+  // signature <A:Ljava/lang/Object;>(TA;)Lscala/collection/immutable/List<TA;>;
+  // declaration: scala.collection.immutable.List<A> get1<A>(A)
+  public get1(Ljava/lang/Object;)Lscala/collection/immutable/List;
+    // parameter final  a
+   L0
+    LINENUMBER 14 L0
+    GETSTATIC scala/collection/immutable/List$.MODULE$ : Lscala/collection/immutable/List$;
+    GETSTATIC scala/Predef$.MODULE$ : Lscala/Predef$;
+    ICONST_1
+    ANEWARRAY java/lang/Object
+    DUP
+    ICONST_0
+    ALOAD 1
+    AASTORE
+    INVOKEVIRTUAL scala/Predef$.genericWrapArray (Ljava/lang/Object;)Lscala/collection/mutable/WrappedArray;
+    INVOKEVIRTUAL scala/collection/immutable/List$.apply (Lscala/collection/Seq;)Lscala/collection/immutable/List;
+    ARETURN
+   L1
+    LOCALVARIABLE this LFooBar$; L0 L1 0
+    LOCALVARIABLE a Ljava/lang/Object; L0 L1 1
+    MAXSTACK = 6
+    MAXLOCALS = 2
+
+  // access flags 0x2
+  private <init>()V
+   L0
+    LINENUMBER 17 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    ALOAD 0
+    PUTSTATIC FooBar$.MODULE$ : LFooBar$;
+   L1
+    LINENUMBER 10 L1
+    ALOAD 0
+    ICONST_1
+    PUTFIELD FooBar$.boo : I
+   L2
+    LINENUMBER 12 L2
+    ALOAD 0
+    NEW Foo
+    DUP
+    INVOKESPECIAL Foo.<init> ()V
+    PUTFIELD FooBar$.local$1 : LFoo;
+   L3
+    LINENUMBER 9 L3
+    RETURN
+   L4
+    LOCALVARIABLE this LFooBar$; L0 L4 0
+    MAXSTACK = 3
+    MAXLOCALS = 1
+}
+

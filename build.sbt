@@ -39,9 +39,9 @@ lazy val tests = (project in file("test"))
   .settings(
     partestFramework,
     libraryDependencies ++= List(
-      scalaOrganization.value               % "scala-reflect" % scalaVersion.value % Provided,
-      scalaOrganization.value               % "scala-compiler" % scalaVersion.value % Provided,
-      partestDependency(scalaVersion.value) % Test
+      scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
+      partestDependency(scalaVersion.value),
     )
   )
 

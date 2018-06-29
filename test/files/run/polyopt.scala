@@ -1,3 +1,10 @@
+import scalaz.plugin.test._
+
+import java.io.{ BufferedReader, File, InputStreamReader }
+
+object Test extends AsmpTest {
+
+  override def code = """
 //object Foo {
 //  val value: List[Any] = Nil
 //  def get[A]: List[A] = value.asInstanceOf[List[A]]
@@ -11,4 +18,10 @@ object FooBar {
   def get[A]: Foo[A] = new Foo()
 
   def get1[A](a: A): List[A] = List(a)
+}
+
+    """.stripMargin
+
+  override def classes = "FooBar$" :: Nil
+
 }
