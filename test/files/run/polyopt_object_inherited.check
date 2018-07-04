@@ -1,0 +1,61 @@
+// class version 52.0 (52)
+// access flags 0x31
+// signature LParent<Ljava/lang/String;>;
+// declaration: Child$ extends Parent<java.lang.String>
+public final class Child$ extends Parent  {
+
+  // compiled from: newSource1.scala
+
+  ATTRIBUTE Scala : unknown
+
+  ATTRIBUTE ScalaInlineInfo : unknown
+
+  // access flags 0x9
+  public static LChild$; MODULE$
+
+  // access flags 0x11
+  // signature LFoo<Ljava/lang/String;>;
+  // declaration: Foo<java.lang.String>
+  public final LFoo; local$1
+
+  // access flags 0x9
+  public static <clinit>()V
+    NEW Child$
+    INVOKESPECIAL Child$.<init> ()V
+    RETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+
+  // access flags 0x11
+  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/String;>;
+  // declaration: Foo<java.lang.String> someFunc<X>()
+  public final someFunc()LFoo;
+   L0
+    LINENUMBER 9 L0
+    ALOAD 0
+    GETFIELD Child$.local$1 : LFoo;
+    ARETURN
+   L1
+    LOCALVARIABLE this LChild$; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x2
+  private <init>()V
+   L0
+    LINENUMBER 9 L0
+    ALOAD 0
+    INVOKESPECIAL Parent.<init> ()V
+    ALOAD 0
+    PUTSTATIC Child$.MODULE$ : LChild$;
+    ALOAD 0
+    ALOAD 0
+    INVOKESPECIAL Parent.someFunc ()LFoo;
+    PUTFIELD Child$.local$1 : LFoo;
+    RETURN
+   L1
+    LOCALVARIABLE this LChild$; L0 L1 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+}
+
