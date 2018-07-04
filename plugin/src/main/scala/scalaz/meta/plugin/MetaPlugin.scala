@@ -13,12 +13,12 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
 
   scalazDefns.init()
 
-  val resolutionFix = new {
+  object resolutionFix extends {
     val global: plugin.global.type                                  = plugin.global
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
   } with ResolutionFix
 
-  resolutionFix.init()
+  if (!options.contains("-resolution")) resolutionFix.init()
 
   object sufficiency extends {
     val global: plugin.global.type                                  = plugin.global
@@ -35,5 +35,13 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
   } with PolymorphicFunctionOptimizer
 
-  val components = List(sufficiency, orphanChecker, polymorphicFunctionOptimizer)
+  val components: List[PluginComponent] = List(
+    "minimal" -> sufficiency,
+    "orphans" -> orphanChecker,
+    "polyopt" -> polymorphicFunctionOptimizer
+  ).flatMap {
+    case (opt, phf) =>
+      if (options.contains(s"-$opt")) None
+      else Some(phf)
+  }
 }

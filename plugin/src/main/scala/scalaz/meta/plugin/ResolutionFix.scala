@@ -1,7 +1,5 @@
 package scalaz.meta.plugin
 
-import scalaz.meta.plugin.Definitions
-
 import scala.collection.mutable
 import scala.reflect.ClassTag
 import scala.tools.nsc.typechecker.Analyzer
