@@ -18,6 +18,26 @@ abstract class ResolutionFix {
   final class NewAnalyzer extends {
     val global: ResolutionFix.this.global.type = ResolutionFix.this.global
   } with Analyzer {
+    def selectScore(tree: Tree): Option[Int] = tree match {
+      case TypeApply(fun, args) => selectScore(fun)
+      case Select(qualifier, _) => selectScore(qualifier).map(_ + 1)
+      case Ident(a)             => Some(1)
+      case This(_)              => Some(0)
+      case Super(qual, _)       => selectScore(qual)
+      case _                    => None
+    }
+
+    def chooseBestInstance(tree: Tree, all: List[SearchResult]): SearchResult =
+      if (all.isEmpty) SearchFailure
+      else
+        all.minBy { r =>
+          val s = if (r.isSuccess) 0 else 1
+          val l = if (r.tree.symbol.isParameter) 0 else 1
+          val d = selectScore(r.tree).getOrElse(100)
+
+          (s, l, d)
+        }
+
     override def inferImplicit(
       tree: Tree,
       pt: Type,
@@ -40,7 +60,7 @@ abstract class ResolutionFix {
 
         val search = new ImplicitSearch(tree, pt, isView, implicitSearchContext, pos)
         pluginsNotifyImplicitSearch(search)
-        val result = search.allImplicits.find(_.isSuccess).getOrElse(search.bestImplicit)
+        val result = chooseBestInstance(tree, search.allImplicits)
         pluginsNotifyImplicitSearchResult(result)
 
         if (result.isFailure && saveAmbiguousDivergent && implicitSearchContext.reporter.hasErrors)
