@@ -3,7 +3,7 @@ package scalaz.meta.plugin
 import scala.collection.mutable
 import scala.reflect.ClassTag
 import scala.tools.nsc.typechecker.Analyzer
-import scala.tools.nsc.{Global, SubComponent}
+import scala.tools.nsc.{ Global, SubComponent }
 
 abstract class ResolutionFix {
   val global: Global
