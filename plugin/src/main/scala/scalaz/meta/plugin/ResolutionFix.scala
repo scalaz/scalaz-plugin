@@ -2,8 +2,8 @@ package scalaz.meta.plugin
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
-import scala.tools.nsc.typechecker.{Analyzer, AnalyzerPlugins}
-import scala.tools.nsc.{Global, SubComponent}
+import scala.tools.nsc.typechecker.{ Analyzer, AnalyzerPlugins }
+import scala.tools.nsc.{ Global, SubComponent }
 import scala.util.control.NonFatal
 
 abstract class ResolutionFix {
@@ -104,21 +104,21 @@ abstract class ResolutionFix {
   def setGlobalAnalyzer =
     valSetter[Global, Analyzer]("analyzer")
 
-  def init(): Unit = {
+  def init(): Unit =
     try {
-      val phases = getGlobalPhasesSet(global)
+      val phases     = getGlobalPhasesSet(global)
       val phaseDescs = getGlobalPhasesDescMap(global)
 
       setGlobalAnalyzer(global, newAnalyzer)
 
-      val oldNamer = phases.find(s => s.phaseName == "namer").get
+      val oldNamer     = phases.find(s => s.phaseName == "namer").get
       val oldNamerDesc = phaseDescs(oldNamer)
       phases.remove(oldNamer)
       phaseDescs.remove(oldNamer)
       phases.add(newAnalyzer.namerFactory)
       phaseDescs.put(newAnalyzer.namerFactory, oldNamerDesc)
 
-      val oldTyper = phases.find(s => s.phaseName == "typer").get
+      val oldTyper     = phases.find(s => s.phaseName == "typer").get
       val oldTyperDesc = phaseDescs(oldTyper)
       phases.remove(oldTyper)
       phaseDescs.remove(oldTyper)
@@ -128,5 +128,4 @@ abstract class ResolutionFix {
       case NonFatal(e) =>
         e.printStackTrace()
     }
-  }
 }
