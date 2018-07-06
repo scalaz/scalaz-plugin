@@ -26,6 +26,9 @@ abstract class Definitions {
   lazy val EnableOrphansFlag: ClassSymbol =
     rootMirror.getRequiredClass("scalaz.meta.features.orphans")
 
+  lazy val NewtypeAnnotation: ClassSymbol =
+    rootMirror.getRequiredClass("scalaz.meta.newtype")
+
   lazy val MinimalAttr =
     rootMirror.getClassIfDefined(TypeName("scalaz.meta.minimal")).orElse {
       val scope = newScope

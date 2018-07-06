@@ -2,8 +2,9 @@ package scalaz.meta.plugin
 
 import scala.collection.mutable
 import scala.reflect.ClassTag
-import scala.tools.nsc.typechecker.Analyzer
-import scala.tools.nsc.{ Global, SubComponent }
+import scala.tools.nsc.typechecker.{Analyzer, AnalyzerPlugins}
+import scala.tools.nsc.{Global, SubComponent}
+import scala.util.control.NonFatal
 
 abstract class ResolutionFix {
   val global: Global
@@ -89,6 +90,13 @@ abstract class ResolutionFix {
       field.get(t).asInstanceOf[U]
   }
 
+  def set[U](obj: AnyRef, name: String, value: U): Unit = {
+    val cls   = obj.getClass
+    val field = cls.getDeclaredField(name)
+    field.setAccessible(true)
+    field.set(obj, value)
+  }
+
   def getGlobalPhasesSet =
     valGetter[Global, mutable.HashSet[SubComponent]]("phasesSet")
   def getGlobalPhasesDescMap =
@@ -97,16 +105,28 @@ abstract class ResolutionFix {
     valSetter[Global, Analyzer]("analyzer")
 
   def init(): Unit = {
-    val phases     = getGlobalPhasesSet(global)
-    val phaseDescs = getGlobalPhasesDescMap(global)
+    try {
+      val phases = getGlobalPhasesSet(global)
+      val phaseDescs = getGlobalPhasesDescMap(global)
 
-    val oldTyper = phases.find(s => s.phaseName == "typer").get
-    val oldDesc  = phaseDescs(oldTyper)
+      setGlobalAnalyzer(global, newAnalyzer)
 
-    phases.remove(oldTyper)
-    phaseDescs.remove(oldTyper)
-    setGlobalAnalyzer(global, newAnalyzer)
-    phases.add(newAnalyzer.typerFactory)
-    phaseDescs.put(newAnalyzer.typerFactory, oldDesc)
+      val oldNamer = phases.find(s => s.phaseName == "namer").get
+      val oldNamerDesc = phaseDescs(oldNamer)
+      phases.remove(oldNamer)
+      phaseDescs.remove(oldNamer)
+      phases.add(newAnalyzer.namerFactory)
+      phaseDescs.put(newAnalyzer.namerFactory, oldNamerDesc)
+
+      val oldTyper = phases.find(s => s.phaseName == "typer").get
+      val oldTyperDesc = phaseDescs(oldTyper)
+      phases.remove(oldTyper)
+      phaseDescs.remove(oldTyper)
+      phases.add(newAnalyzer.typerFactory)
+      phaseDescs.put(newAnalyzer.typerFactory, oldTyperDesc)
+    } catch {
+      case NonFatal(e) =>
+        e.printStackTrace()
+    }
   }
 }

@@ -1,7 +1,9 @@
 package scalaz.meta.plugin
 
+import scala.reflect.ClassTag
 import scala.tools.nsc._
 import scala.tools.nsc.plugins._
+import scala.tools.nsc.typechecker.AnalyzerPlugins
 
 class MetaPlugin(val global: Global) extends Plugin { plugin =>
   val name        = "scalaz"
@@ -35,7 +37,17 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
   } with PolymorphicFunctionOptimizer
 
-  val components: List[PluginComponent] = List(
+  object newtypes extends {
+    val global: plugin.global.type                                  = plugin.global
+    val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
+  } with Newtypes
+
+  if (!options.contains("-newtypes")) {
+    global.analyzer.addAnalyzerPlugin(newtypes.MyTransformer)
+    global.analyzer.addMacroPlugin(newtypes.MyTransformer)
+  }
+
+  val components: List[PluginComponent] = List[(String, PluginComponent)](
     "minimal" -> sufficiency,
     "orphans" -> orphanChecker,
     "polyopt" -> polymorphicFunctionOptimizer

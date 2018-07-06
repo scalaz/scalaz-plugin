@@ -17,8 +17,13 @@ lazy val plugin = (project in file("plugin"))
     crossVersion := CrossVersion.full,
     libraryDependencies ++= List(
       scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
-      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
-    )
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
+      "org.scalaz" %% "scalaz-core" % "7.2.25"
+    ),
+    assemblyShadeRules in assembly := Seq(
+      ShadeRule.rename("scalaz.**" -> "shadedz.@1").inAll
+    ),
+    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7")
   )
   .dependsOn(metaJVM)
 
