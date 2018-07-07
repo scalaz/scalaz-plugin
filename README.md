@@ -41,8 +41,8 @@ See [test/files](test/files) for more examples. We would like to get a lot more 
 
 ```scala
 resolvers += Resolver.bintrayRepo("alexknvl", "maven"),
-libraryDependencies += "org.scalaz" %% "scalaz-meta" % "0689c289+20180707-0014",
-addCompilerPlugin("org.scalaz" % "scalaz-plugin_2.12.6" % "0689c289+20180707-0014")
+libraryDependencies += "org.scalaz" %% "scalaz-plugin-library" % "77dd9707",
+addCompilerPlugin("org.scalaz" % "scalaz-plugin_2.12.6" % "77dd9707")
 ```
 For the latest version, see https://bintray.com/alexknvl/maven/scalaz-plugin
 
