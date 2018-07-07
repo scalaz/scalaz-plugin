@@ -37,6 +37,15 @@ if (a === b) {
 
 See [test/files](test/files) for more examples. We would like to get a lot more things done eventually, see open issues.
 
+## Using (temporary)
+
+```scala
+resolvers += Resolver.bintrayRepo("alexknvl", "maven"),
+libraryDependencies += "org.scalaz" %% "scalaz-meta" % "0689c289+20180707-0014",
+addCompilerPlugin("org.scalaz" % "scalaz-plugin_2.12.6" % "0689c289+20180707-0014")
+```
+For the latest version, see https://bintray.com/alexknvl/maven/scalaz-plugin
+
 ---
 
 #### Other great compiler plugins you should check out
