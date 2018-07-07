@@ -72,7 +72,11 @@ trait AnnotationTransformers {
           annotteeMap.get(t.symbol) match {
             case None =>
               if (annotteeModules.contains(t.symbol)) Nil else List(t)
-            case Some((c, m)) => transformAnnotated(c, m)
+            case Some((c, m)) =>
+              localTyper.context.owner.info.members.unlink(t.symbol)
+              val res = transformAnnotated(c, m)
+              res.map(localTyper.namer.standardEnterSym(_))
+              res
           }
         })
       }
