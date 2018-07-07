@@ -14,6 +14,8 @@ lazy val metaJS  = meta.js
 
 lazy val plugin = (project in file("plugin"))
   .settings(
+    name := "scalaz-plugin",
+    licenses += ("LGPL-3.0", url("https://opensource.org/licenses/LGPL-3.0")),
     crossVersion := CrossVersion.full,
     libraryDependencies ++= List(
       scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
