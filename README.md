@@ -4,6 +4,15 @@
 
 A compiler plugin that improves on the scala compiler on the assumption that the user is using the Scalazzi-safe subset of Scala.
 
+## What does this plugin do?
+
+ * [x] Sufficiency checker. [Example](test/files/neg/test_bifunctor.scala).
+ * [x] Non-ambigious typeclass resolution. [Example](test/files/pos/ambigious_typeclass_parameters.scala).
+ * [x] Orphan instance checker. [Some](test/files/neg/orphan_definitions.scala) [examples](test/files/neg/eq_contramap.scala).
+ * [x] [Polymorphic function optimization](doc/PolymorphicFunctionOptimization.md).
+
+See [test/files](test/files) for more examples. We would like to get a lot more things done eventually, see open issues.
+
 ## What is Scalazzi
 
  * No `null`.
@@ -27,15 +36,6 @@ if (a === b) {
   // now we know that a.type === b.type
 }
 ```
-
-## What does this plugin do?
-
- * [x] Sufficiency checker. [Example](test/files/neg/test_bifunctor.scala).
- * [x] Non-ambigious typeclass resolution. [Example](test/files/pos/ambigious_typeclass_parameters.scala).
- * [x] Orphan instance checker. [Some](test/files/neg/orphan_definitions.scala) [examples](test/files/neg/eq_contramap.scala).
- * [x] [Polymorphic function optimization](doc/PolymorphicFunctionOptimization.md).
-
-See [test/files](test/files) for more examples. We would like to get a lot more things done eventually, see open issues.
 
 ---
 
