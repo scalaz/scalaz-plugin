@@ -35,10 +35,16 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
   } with PolymorphicFunctionOptimizer
 
+  object lazyValOptimizer extends {
+    val global: plugin.global.type                                  = plugin.global
+    val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
+  } with LazyValOptimizer
+
   val components: List[PluginComponent] = List(
-    "minimal" -> sufficiency,
-    "orphans" -> orphanChecker,
-    "polyopt" -> polymorphicFunctionOptimizer
+    "minimal"    -> sufficiency,
+    "orphans"    -> orphanChecker,
+    "polyopt"    -> polymorphicFunctionOptimizer,
+    "lazyvalopt" -> lazyValOptimizer
   ).flatMap {
     case (opt, phf) =>
       if (options.contains(s"-$opt")) None
