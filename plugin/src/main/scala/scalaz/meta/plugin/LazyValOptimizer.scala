@@ -18,18 +18,68 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
   def newTransformer(unit: CompilationUnit): Transformer = new MyTransformer(unit)
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
+
+    // TODO
+    private def createMethodBody(flag: ValDef, holder: ValDef): Tree = EmptyTree
+
+    private def rewriteLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
+      import scala.reflect.internal.Flags._
+
+      // remove lazy val
+      owner.info.decls.unlink(lazyVal.symbol)
+
+      // dynamic name
+      val postfixName = "$" + lazyVal.pos.line + lazyVal.pos.column
+
+      // create var flag
+      val flagTerm = owner
+        .newVariable(TermName("$lazyflags" + postfixName), lazyVal.pos, PRIVATE | LOCAL)
+        .setInfoAndEnter(global.definitions.IntTpe)
+      val lazyFlag = newValDef(flagTerm, Literal(Constant(0)))()
+
+      // create var value holder
+      val valueTerm = owner
+        .newVariable(TermName(lazyVal.symbol.name + "$value" + postfixName),
+                     lazyFlag.pos,
+                     PRIVATE | LOCAL | DEFAULTINIT)
+        .setInfoAndEnter(lazyVal.tpt.tpe)
+      val valueHolder = newValDef(valueTerm, EmptyTree)()
+
+      // create method with same name as lazy val
+      val methodTerm = owner
+        .newMethod(TermName(lazyVal.symbol.name.toString), valueHolder.pos)
+        .setInfoAndEnter(lazyVal.tpt.tpe)
+      val method = newDefDef(methodTerm, createMethodBody(lazyFlag, valueHolder))()
+
+      List(localTyper.typedValDef(lazyFlag),
+           localTyper.typedValDef(valueHolder),
+           localTyper.typedDefDef(method))
+    }
+
+    private def processBody(owner: Symbol, tmpl: Template): Template =
+      treeCopy.Template(
+        tmpl,
+        tmpl.parents,
+        tmpl.self,
+        tmpl.body.flatMap { // TODO: this will create flag for each lazy val; will change to combined them all in single int
+          case lazyVal @ ValDef(mods, _, _, _) if mods.isLazy =>
+            rewriteLazyVal(owner, lazyVal)
+          case x => List(x)
+        }
+      )
+
     override def transform(tree: Tree): Tree =
-      //println(global.showRaw(tree))
       try {
         tree match {
-          case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, body)) =>
-            // check body has lazy val
-            // optimize it
-            tree
-          case mod @ ModuleDef(_, _, tmpl @ Template(_, _, body)) =>
-            // check body has lazy val
-            // optimize it
-            tree
+          case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _)) =>
+            super.transform(
+              treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl))
+            )
+          case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _)) =>
+            super.transform(
+              treeCopy
+                .ModuleDef(tree, mod.mods, mod.name, processBody(mod.symbol.moduleClass, tmpl))
+            )
           case _ => super.transform(tree)
         }
       } catch {

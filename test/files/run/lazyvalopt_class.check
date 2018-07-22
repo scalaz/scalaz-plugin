@@ -1,0 +1,55 @@
+// class version 52.0 (52)
+// access flags 0x21
+public class LazyFoo {
+
+  // compiled from: newSource1.scala
+
+  @Lscala/reflect/ScalaSignature;(bytes="\u0006\u0001-2A!\u0001\u0002\u0001\u000b\u00099A*\u0019>z\r>|'\"A\u0002\u0002\u000fq*W\u000e\u001d;z}\r\u00011C\u0001\u0001\u0007!\u00099!\"D\u0001\u0009\u0015\u0005I\u0011!B:dC2\u000c\u0017BA\u0006\u0009\u0005\u0019\u0009e.\u001f*fM\")Q\u0002\u0001C\u0001\u001d\u00051A(\u001b8jiz\"\u0012a\u0004\u0009\u0003!\u0001i\u0011A\u0001\u0005\u0007%\u0001\u0001\u000b\u0015B\n\u0002\u001d\u0011b\u0017M_=gY\u0006<7\u000fJ\u001a2eA\u0011q\u0001F\u0005\u0003+!\u00111!\u00138u\u0011%9\u0002\u00011A\u0001B\u0003&1#A\u0007g_>$c/\u00197vK\u0012\u001a\u0014G\r\u0005\u00063\u0001!\u0009aE\u0001\u0004M>|\u0007BB\u000e\u0001A\u0003&1#\u0001\u0008%Y\u0006T\u0018P\u001a7bON$C'\r\u001a\u0009\u0013u\u0001\u0001\u0019!A!B\u0013q\u0012!\u00042be\u00122\u0018\r\\;fIQ\n$\u0007\u0005\u0002 M9\u0011\u0001\u0005\n\u0009\u0003C!i\u0011A\u0009\u0006\u0003G\u0011\u0009a\u0001\u0010:p_Rt\u0014BA\u0013\u0009\u0003\u0019\u0001&/\u001a3fM&\u0011q\u0005\u000b\u0002\u0007'R\u0014\u0018N\\4\u000b\u0005\u0015B\u0001\"\u0002\u0016\u0001\u0009\u0003q\u0012a\u00012be\u0002")
+
+  ATTRIBUTE ScalaSig : unknown
+
+  ATTRIBUTE ScalaInlineInfo : unknown
+
+  // access flags 0x2
+  private I $lazyflags$312
+
+  // access flags 0x2
+  private I foo$value$312
+
+  // access flags 0x2
+  private I $lazyflags$412
+
+  // access flags 0x2
+  private Ljava/lang/String; bar$value$412
+
+  // access flags 0x401
+  public abstract foo()I
+
+  // access flags 0x401
+  public abstract bar()Ljava/lang/String;
+
+  // access flags 0x1
+  public <init>()V
+   L0
+    LINENUMBER 6 L0
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+   L1
+    LINENUMBER 3 L1
+    ALOAD 0
+    ICONST_0
+    PUTFIELD LazyFoo.$lazyflags$312 : I
+   L2
+    LINENUMBER 4 L2
+    ALOAD 0
+    ICONST_0
+    PUTFIELD LazyFoo.$lazyflags$412 : I
+   L3
+    LINENUMBER 2 L3
+    RETURN
+   L4
+    LOCALVARIABLE this LLazyFoo; L0 L4 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+}
+

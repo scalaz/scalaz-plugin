@@ -4,6 +4,7 @@ object Test extends AsmpTest {
   override def code = """
                         |class LazyFoo {
                         |  lazy val foo: Int = 1
+                        |  lazy val bar: String = "scalaz"
                         |}
                       """.stripMargin
 
