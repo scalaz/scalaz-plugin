@@ -52,35 +52,29 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
     private def rewriteLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
       import scala.reflect.internal.Flags._
 
-      // remove lazy val
-      owner.info.decls.unlink(lazyVal.symbol)
-
-      // dynamic name
-      val postfixName = "$" + lazyVal.pos.line + lazyVal.pos.column
-
       // create var flag
+      val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
       val flagTerm = owner
-        .newVariable(TermName("$lazyflag" + postfixName), owner.pos, PrivateLocal | SYNTHETIC)
+        .newVariable(flagName, owner.pos, PrivateLocal | SYNTHETIC)
         .setInfoAndEnter(global.definitions.IntTpe)
-      val lazyFlag = newValDef(flagTerm, Literal(Constant(0)))()
+      val flag = newValDef(flagTerm, Literal(Constant(0)))()
 
       // create var value holder
-      val valueTerm = owner
-        .newVariable(TermName(lazyVal.symbol.name + "$value" + postfixName),
-                     owner.pos,
-                     PrivateLocal | SYNTHETIC | DEFAULTINIT)
+      val holderName = freshTermName(lazyVal.name + "$value$")(currentFreshNameCreator)
+      val holderTerm = owner
+        .newVariable(holderName, owner.pos, PrivateLocal | SYNTHETIC | DEFAULTINIT)
         .setInfoAndEnter(lazyVal.tpt.tpe)
-      val valueHolder = newValDef(valueTerm, EmptyTree)()
+      val holder = newValDef(holderTerm, EmptyTree)()
 
       // create method with same name as lazy val
       val methodTerm = owner
         .newMethodSymbol(lazyVal.name, owner.pos, FINAL | SYNTHETIC | ACCESSOR | METHOD)
         .setInfoAndEnter(lazyVal.tpt.tpe)
       val method =
-        newDefDef(methodTerm, createMethodBody(owner, lazyFlag, valueHolder, lazyVal.rhs))()
+        newDefDef(methodTerm, createMethodBody(owner, flag, holder, lazyVal.rhs))()
 
-      List(localTyper.typedValDef(lazyFlag),
-           localTyper.typedValDef(valueHolder),
+      List(localTyper.typedValDef(flag),
+           localTyper.typedValDef(holder),
            localTyper.typedDefDef(method))
     }
 
