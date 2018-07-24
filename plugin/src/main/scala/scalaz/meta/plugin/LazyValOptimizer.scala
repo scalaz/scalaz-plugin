@@ -62,7 +62,7 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
 
       val setterSym = owner.newMethodSymbol(getterSym.name.setterName,
                                             owner.pos.focus,
-                                            newFlags = ACCESSOR | MUTABLE | PRIVATE)
+                                            newFlags = ACCESSOR | PRIVATE)
       val setterParams = setterSym.newSyntheticValueParams(tpe :: Nil)
       setterSym.setInfoAndEnter(MethodType(setterParams, definitions.UnitTpe))
       val setter = localTyper.typedPos(setterSym.pos.focus)(DefDef(setterSym, EmptyTree))
@@ -81,6 +81,9 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
     private def rewriteLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
       import scala.reflect.internal.Flags._
 
+      // remove lazy val
+      owner.info.decls.unlink(lazyVal.symbol)
+
       // create var flag
       val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
       val flag :: flag_ :: Nil =
@@ -92,8 +95,8 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
 
       // create method with same name as lazy val
       val methodTerm = owner
-        .newMethodSymbol(lazyVal.name, owner.pos, FINAL | SYNTHETIC)
-        .setInfoAndEnter(lazyVal.tpt.tpe)
+        .newMethodSymbol(lazyVal.name, owner.pos.focus, FINAL | SYNTHETIC | METHOD)
+        .setInfoAndEnter(NullaryMethodType(lazyVal.tpt.tpe))
       val method = localTyper.typedPos(methodTerm.pos.focus)(
         DefDef(methodTerm, createMethodBody(owner, flag.symbol, holder.symbol, lazyVal.rhs))
       )
