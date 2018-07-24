@@ -19,7 +19,7 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
 
-    private def createMethodBody(owner: Symbol, flag: ValDef, holder: ValDef, body: Tree): Tree = {
+    private def createMethodBody(owner: Symbol, flag: Symbol, holder: Symbol, body: Tree): Tree = {
       val cond: Tree = {
         Apply(
           Select(
@@ -49,33 +49,56 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
       Block(List(If(cond, thenp, elsep)), ret)
     }
 
+    private def createGetterSetter(owner: Symbol,
+                                   name: TermName,
+                                   tpe: Type,
+                                   value: Tree): List[Tree] = {
+      import scala.reflect.internal.Flags._
+
+      val getterSym =
+        owner.newMethodSymbol(name, owner.pos.focus, newFlags = ACCESSOR | MUTABLE | PRIVATE)
+      getterSym.setInfoAndEnter(NullaryMethodType(tpe))
+      val getter = localTyper.typedPos(getterSym.pos.focus)(ValDef(getterSym, value))
+
+      val setterSym = owner.newMethodSymbol(getterSym.name.setterName,
+                                            owner.pos.focus,
+                                            newFlags = ACCESSOR | MUTABLE | PRIVATE)
+      val setterParams = setterSym.newSyntheticValueParams(tpe :: Nil)
+      setterSym.setInfoAndEnter(MethodType(setterParams, definitions.UnitTpe))
+      val setter = localTyper.typedPos(setterSym.pos.focus)(DefDef(setterSym, EmptyTree))
+
+      getter :: setter :: Nil
+    }
+
+    private def print[A](v: A): Unit = {
+      println
+      println(v)
+      println
+      println(showRaw(v))
+      println
+    }
+
     private def rewriteLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
       import scala.reflect.internal.Flags._
 
       // create var flag
       val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
-      val flagTerm = owner
-        .newVariable(flagName, owner.pos, PrivateLocal | SYNTHETIC)
-        .setInfoAndEnter(global.definitions.IntTpe)
-      val flag = newValDef(flagTerm, Literal(Constant(0)))()
+      val flag :: flag_ :: Nil =
+        createGetterSetter(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
 
       // create var value holder
-      val holderName = freshTermName(lazyVal.name + "$value$")(currentFreshNameCreator)
-      val holderTerm = owner
-        .newVariable(holderName, owner.pos, PrivateLocal | SYNTHETIC | DEFAULTINIT)
-        .setInfoAndEnter(lazyVal.tpt.tpe)
-      val holder = newValDef(holderTerm, EmptyTree)()
+      val holder :: holder_ :: Nil =
+        createGetterSetter(owner, TermName(lazyVal.name + "$value$"), lazyVal.tpt.tpe, EmptyTree)
 
       // create method with same name as lazy val
       val methodTerm = owner
-        .newMethodSymbol(lazyVal.name, owner.pos, FINAL | SYNTHETIC | ACCESSOR | METHOD)
+        .newMethodSymbol(lazyVal.name, owner.pos, FINAL | SYNTHETIC)
         .setInfoAndEnter(lazyVal.tpt.tpe)
-      val method =
-        newDefDef(methodTerm, createMethodBody(owner, flag, holder, lazyVal.rhs))()
+      val method = localTyper.typedPos(methodTerm.pos.focus)(
+        DefDef(methodTerm, createMethodBody(owner, flag.symbol, holder.symbol, lazyVal.rhs))
+      )
 
-      List(localTyper.typedValDef(flag),
-           localTyper.typedValDef(holder),
-           localTyper.typedDefDef(method))
+      List(flag, flag_, holder, holder_, method)
     }
 
     private def processBody(owner: Symbol, tmpl: Template): Template =
@@ -95,9 +118,11 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
       try {
         tree match {
           case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _)) =>
-            super.transform(
+            val cd1 = super.transform(
               treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl))
             )
+            print(cd1)
+            cd1
           case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _)) =>
             super.transform(
               treeCopy.ModuleDef(tree,
