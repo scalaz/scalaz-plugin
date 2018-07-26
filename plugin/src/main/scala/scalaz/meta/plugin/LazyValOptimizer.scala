@@ -1,11 +1,16 @@
 package scalaz.meta.plugin
 
 import scala.tools.nsc.Global
+import scala.tools.nsc.ast.TreeDSL
 import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.transform.{ Transform, TypingTransformers }
 import scala.util.control.NonFatal
 
-abstract class LazyValOptimizer extends PluginComponent with Transform with TypingTransformers {
+abstract class LazyValOptimizer
+    extends PluginComponent
+    with Transform
+    with TypingTransformers
+    with TreeDSL {
   val global: Global
   val scalazDefns: Definitions { val global: LazyValOptimizer.this.global.type }
 
@@ -20,65 +25,50 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
 
     private def createMethodBody(owner: Symbol, flag: Symbol, holder: Symbol, body: Tree): Tree = {
-      val cond: Tree = {
-        Apply(
-          Select(
-            Apply(Select(Select(This(owner), flag.name), TermName("$amp")),
-                  List(Literal(Constant(1)))),
-            TermName("$bang$eq")
-          ),
-          List(Literal(Constant(0)))
+
+      import CODE._
+
+      val cond = {
+        val bitwiseAnd = This(owner) DOT flag.name DOT TermName("$amp") APPLY List(
+          Literal(Constant(1))
         )
+        bitwiseAnd DOT TermName("$bang$eq") APPLY List(Literal(Constant(0)))
       }
 
-      val thenp: Tree = Block(
-        List(
-          Assign(
-            Select(This(owner), flag.name),
-            Apply(Select(Select(This(owner), flag.name), TermName("$bar")),
-                  List(Literal(Constant(1))))
-          )
-        ),
-        Assign(Select(This(owner), holder.name), body)
+      // then part
+      val thenp = BLOCK(
+        (This(owner) DOT flag.name) === {
+          This(owner) DOT flag.name DOT TermName("$bar") APPLY List(Literal(Constant(1)))
+        },
+        (This(owner) DOT holder.name) === body
       )
 
-      val elsep: Tree = Literal(Constant(()))
-
-      val ret: Tree = Select(This(owner), holder.name)
-
-      Block(List(If(cond, thenp, elsep)), ret)
+      // else part empty and return holder value
+      BLOCK(IF(cond) THEN thenp ELSE EmptyTree, This(owner) DOT holder.name)
     }
 
-    private def createGetterSetter(owner: Symbol,
-                                   name: TermName,
-                                   tpe: Type,
-                                   value: Tree): List[Tree] = {
+    def createField(owner: Symbol, name: TermName, tpe: Type, body: Tree): Tree = {
       import scala.reflect.internal.Flags._
 
-      val getterSym =
-        owner.newMethodSymbol(name, owner.pos.focus, newFlags = ACCESSOR | MUTABLE | PRIVATE)
-      getterSym.setInfoAndEnter(NullaryMethodType(tpe))
-      val getter = localTyper.typedPos(getterSym.pos.focus)(ValDef(getterSym, value))
+      val variableSym = owner.newVariable(name, owner.pos.focus, newFlags = PrivateLocal)
+      variableSym.setInfoAndEnter(tpe)
+      val variable = localTyper.typedPos(variableSym.pos.focus)(ValDef(variableSym, body))
 
-      val setterSym = owner.newMethodSymbol(getterSym.name.setterName,
-                                            owner.pos.focus,
-                                            newFlags = ACCESSOR | PRIVATE)
+      val getterSym =
+        owner.newMethodSymbol(variableSym.name.getterName, owner.pos.focus, newFlags = ACCESSOR)
+      getterSym.setInfoAndEnter(NullaryMethodType(tpe))
+      val getter = localTyper.typedPos(getterSym.pos.focus)(DefDef(getterSym, body))
+
+      val setterSym =
+        owner.newMethodSymbol(getterSym.name.setterName, owner.pos.focus, newFlags = ACCESSOR)
       val setterParams = setterSym.newSyntheticValueParams(tpe :: Nil)
       setterSym.setInfoAndEnter(MethodType(setterParams, definitions.UnitTpe))
       val setter = localTyper.typedPos(setterSym.pos.focus)(DefDef(setterSym, EmptyTree))
 
-      getter :: setter :: Nil
+      variable
     }
 
-    private def print[A](v: A): Unit = {
-      println
-      println(v)
-      println
-      println(showRaw(v))
-      println
-    }
-
-    private def rewriteLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
+    private def optimizeLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
       import scala.reflect.internal.Flags._
 
       // remove lazy val
@@ -86,12 +76,12 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
 
       // create var flag
       val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
-      val flag :: flag_ :: Nil =
-        createGetterSetter(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
+      val flag =
+        createField(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
 
       // create var value holder
-      val holder :: holder_ :: Nil =
-        createGetterSetter(owner, TermName(lazyVal.name + "$value$"), lazyVal.tpt.tpe, EmptyTree)
+      val holder =
+        createField(owner, TermName(lazyVal.name + "$value$"), lazyVal.tpt.tpe, EmptyTree)
 
       // create method with same name as lazy val
       val methodTerm = owner
@@ -101,7 +91,7 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
         DefDef(methodTerm, createMethodBody(owner, flag.symbol, holder.symbol, lazyVal.rhs))
       )
 
-      List(flag, flag_, holder, holder_, method)
+      List(flag, holder, method)
     }
 
     private def processBody(owner: Symbol, tmpl: Template): Template =
@@ -111,7 +101,7 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
         tmpl.self,
         tmpl.body.flatMap { // TODO: this will create flag for each lazy val; will combined them all in single int
           case lazyVal @ ValDef(mods, _, _, _) if mods.isLazy =>
-            rewriteLazyVal(owner, lazyVal)
+            optimizeLazyVal(owner, lazyVal)
           case x =>
             List(x)
         }
@@ -121,11 +111,13 @@ abstract class LazyValOptimizer extends PluginComponent with Transform with Typi
       try {
         tree match {
           case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _)) =>
-            val cd1 = super.transform(
-              treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl))
+            super.transform(
+              treeCopy.ClassDef(tree,
+                                cd.mods,
+                                cd.name,
+                                cd.tparams,
+                                processBody(cd.symbol.enclClass, tmpl))
             )
-            print(cd1)
-            cd1
           case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _)) =>
             super.transform(
               treeCopy.ModuleDef(tree,
