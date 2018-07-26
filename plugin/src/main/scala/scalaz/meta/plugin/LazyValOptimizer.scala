@@ -55,17 +55,22 @@ abstract class LazyValOptimizer
     def createField(owner: Symbol, name: TermName, tpe: Type, body: Tree): Tree = {
       import scala.reflect.internal.Flags._
 
-      val variableSym = owner.newVariable(name, owner.pos.focus, newFlags = PrivateLocal | SYNTHETIC)
+      val variableSym =
+        owner.newVariable(name, owner.pos.focus, newFlags = PrivateLocal | SYNTHETIC)
       variableSym.setInfoAndEnter(tpe)
       val variable = localTyper.typedPos(variableSym.pos.focus)(ValDef(variableSym, body))
 
       val getterSym =
-        owner.newMethodSymbol(variableSym.name.getterName, owner.pos.focus, newFlags = ACCESSOR | SYNTHETIC)
+        owner.newMethodSymbol(variableSym.name.getterName,
+                              owner.pos.focus,
+                              newFlags = ACCESSOR | SYNTHETIC)
       getterSym.setInfoAndEnter(NullaryMethodType(tpe))
       localTyper.typedPos(getterSym.pos.focus)(DefDef(getterSym, body))
 
       val setterSym =
-        owner.newMethodSymbol(getterSym.name.setterName, owner.pos.focus, newFlags = ACCESSOR | SYNTHETIC)
+        owner.newMethodSymbol(getterSym.name.setterName,
+                              owner.pos.focus,
+                              newFlags = ACCESSOR | SYNTHETIC)
       val setterParams = setterSym.newSyntheticValueParams(tpe :: Nil)
       setterSym.setInfoAndEnter(MethodType(setterParams, definitions.UnitTpe))
       localTyper.typedPos(setterSym.pos.focus)(DefDef(setterSym, EmptyTree))
@@ -105,23 +110,32 @@ abstract class LazyValOptimizer
 
     private def processBody(owner: Symbol, tmpl: Template): Template = {
 
-      // create var flag for whole block
-      val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
-      val flag     = createField(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
+      val containsLazyVals = tmpl.body.exists {
+        case lazyVal @ ValDef(mods, _, _, _) if mods.isLazy => true
+        case _                                              => false
+      }
 
-      val optimizer = createLazyvalOptimizer
+      if (containsLazyVals) {
+        // create var flag for whole block
+        val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
+        val flag     = createField(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
 
-      treeCopy.Template(
-        tmpl,
-        tmpl.parents,
-        tmpl.self,
-        flag :: tmpl.body.flatMap {
-          case lazyVal @ ValDef(mods, _, _, _) if mods.isLazy =>
-            optimizer(owner, lazyVal, flag)
-          case x =>
-            List(x)
-        }
-      )
+        val optimizer = createLazyvalOptimizer
+
+        treeCopy.Template(
+          tmpl,
+          tmpl.parents,
+          tmpl.self,
+          flag :: tmpl.body.flatMap {
+            case lazyVal @ ValDef(mods, _, _, _) if mods.isLazy =>
+              optimizer(owner, lazyVal, flag)
+            case x =>
+              List(x)
+          }
+        )
+      } else {
+        tmpl
+      }
     }
 
     override def transform(tree: Tree): Tree =
