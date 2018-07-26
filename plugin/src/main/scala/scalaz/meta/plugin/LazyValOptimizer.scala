@@ -5,6 +5,7 @@ import scala.tools.nsc.ast.TreeDSL
 import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.transform.{ Transform, TypingTransformers }
 import scala.util.control.NonFatal
+import scala.reflect.internal.Flags._
 
 abstract class LazyValOptimizer
     extends PluginComponent
@@ -24,13 +25,17 @@ abstract class LazyValOptimizer
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
 
-    private def createMethodBody(owner: Symbol, flag: Symbol, holder: Symbol, body: Tree): Tree = {
+    private def createMethodBody(owner: Symbol,
+                                 flag: Symbol,
+                                 flagValue: Int,
+                                 holder: Symbol,
+                                 body: Tree): Tree = {
 
       import CODE._
 
       val cond = {
         val bitwiseAnd = This(owner) DOT flag.name DOT TermName("$amp") APPLY List(
-          Literal(Constant(1))
+          Literal(Constant(flagValue))
         )
         bitwiseAnd DOT TermName("$bang$eq") APPLY List(Literal(Constant(0)))
       }
@@ -38,7 +43,7 @@ abstract class LazyValOptimizer
       // then part
       val thenp = BLOCK(
         (This(owner) DOT flag.name) === {
-          This(owner) DOT flag.name DOT TermName("$bar") APPLY List(Literal(Constant(1)))
+          This(owner) DOT flag.name DOT TermName("$bar") APPLY List(Literal(Constant(flagValue)))
         },
         (This(owner) DOT holder.name) === body
       )
@@ -50,62 +55,74 @@ abstract class LazyValOptimizer
     def createField(owner: Symbol, name: TermName, tpe: Type, body: Tree): Tree = {
       import scala.reflect.internal.Flags._
 
-      val variableSym = owner.newVariable(name, owner.pos.focus, newFlags = PrivateLocal)
+      val variableSym = owner.newVariable(name, owner.pos.focus, newFlags = PrivateLocal | SYNTHETIC)
       variableSym.setInfoAndEnter(tpe)
       val variable = localTyper.typedPos(variableSym.pos.focus)(ValDef(variableSym, body))
 
       val getterSym =
-        owner.newMethodSymbol(variableSym.name.getterName, owner.pos.focus, newFlags = ACCESSOR)
+        owner.newMethodSymbol(variableSym.name.getterName, owner.pos.focus, newFlags = ACCESSOR | SYNTHETIC)
       getterSym.setInfoAndEnter(NullaryMethodType(tpe))
-      val getter = localTyper.typedPos(getterSym.pos.focus)(DefDef(getterSym, body))
+      localTyper.typedPos(getterSym.pos.focus)(DefDef(getterSym, body))
 
       val setterSym =
-        owner.newMethodSymbol(getterSym.name.setterName, owner.pos.focus, newFlags = ACCESSOR)
+        owner.newMethodSymbol(getterSym.name.setterName, owner.pos.focus, newFlags = ACCESSOR | SYNTHETIC)
       val setterParams = setterSym.newSyntheticValueParams(tpe :: Nil)
       setterSym.setInfoAndEnter(MethodType(setterParams, definitions.UnitTpe))
-      val setter = localTyper.typedPos(setterSym.pos.focus)(DefDef(setterSym, EmptyTree))
+      localTyper.typedPos(setterSym.pos.focus)(DefDef(setterSym, EmptyTree))
 
       variable
     }
 
-    private def optimizeLazyVal(owner: Symbol, lazyVal: ValDef): List[Tree] = {
-      import scala.reflect.internal.Flags._
+    private def createLazyvalOptimizer: (Symbol, ValDef, Tree) => List[Tree] = {
+      var count: Int = -1
+      (owner, lazyVal, flag) =>
+        {
+          // inc count
+          count += 1
 
-      // remove lazy val
-      owner.info.decls.unlink(lazyVal.symbol)
+          // remove lazy val
+          owner.info.decls.unlink(lazyVal.symbol)
 
-      // create var flag
-      val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
-      val flag =
-        createField(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
+          // create var value holder
+          val holder =
+            createField(owner,
+                        TermName(lazyVal.name + "$value$" + count),
+                        lazyVal.tpt.tpe,
+                        EmptyTree)
 
-      // create var value holder
-      val holder =
-        createField(owner, TermName(lazyVal.name + "$value$"), lazyVal.tpt.tpe, EmptyTree)
+          // create method with same name as lazy val
+          val methodTerm = owner
+            .newMethodSymbol(lazyVal.name, owner.pos.focus, SYNTHETIC)
+            .setInfoAndEnter(NullaryMethodType(lazyVal.tpt.tpe))
+          val method = localTyper.typedPos(methodTerm.pos.focus)(
+            DefDef(methodTerm,
+                   createMethodBody(owner, flag.symbol, 1 << count, holder.symbol, lazyVal.rhs))
+          )
 
-      // create method with same name as lazy val
-      val methodTerm = owner
-        .newMethodSymbol(lazyVal.name, owner.pos.focus, FINAL | SYNTHETIC | METHOD)
-        .setInfoAndEnter(NullaryMethodType(lazyVal.tpt.tpe))
-      val method = localTyper.typedPos(methodTerm.pos.focus)(
-        DefDef(methodTerm, createMethodBody(owner, flag.symbol, holder.symbol, lazyVal.rhs))
-      )
-
-      List(flag, holder, method)
+          List(holder, method)
+        }
     }
 
-    private def processBody(owner: Symbol, tmpl: Template): Template =
+    private def processBody(owner: Symbol, tmpl: Template): Template = {
+
+      // create var flag for whole block
+      val flagName = freshTermName("$lazyflag$")(currentFreshNameCreator)
+      val flag     = createField(owner, flagName, definitions.IntTpe, Literal(Constant(0)))
+
+      val optimizer = createLazyvalOptimizer
+
       treeCopy.Template(
         tmpl,
         tmpl.parents,
         tmpl.self,
-        tmpl.body.flatMap { // TODO: this will create flag for each lazy val; will combined them all in single int
+        flag :: tmpl.body.flatMap {
           case lazyVal @ ValDef(mods, _, _, _) if mods.isLazy =>
-            optimizeLazyVal(owner, lazyVal)
+            optimizer(owner, lazyVal, flag)
           case x =>
             List(x)
         }
       )
+    }
 
     override def transform(tree: Tree): Tree =
       try {

@@ -4,7 +4,7 @@ public class LazyFoo {
 
   // compiled from: newSource1.scala
 
-  @Lscala/reflect/ScalaSignature;(bytes="\u0006\u000113A!\u0001\u0002\u0001\u000b\u00099A*\u0019>z\r>|'\"A\u0002\u0002\u000fq*W\u000e\u001d;z}\r\u00011C\u0001\u0001\u0007!\u00099!\"D\u0001\u0009\u0015\u0005I\u0011!B:dC2\u000c\u0017BA\u0006\u0009\u0005\u0019\u0009e.\u001f*fM\")Q\u0002\u0001C\u0001\u001d\u00051A(\u001b8jiz\"\u0012a\u0004\u0009\u0003!\u0001i\u0011A\u0001\u0005\u0007%\u0001\u0001\u000b\u0015B\n\u0002\u0017\u0011b\u0017M_=gY\u0006<G%\r\u0009\u0003\u000fQI!!\u0006\u0005\u0003\u0007%sG\u000fC\u0004\u0013\u0001\u0001\u0007I\u0011A\u000c\u0016\u0003MAq!\u0007\u0001A\u0002\u0013\u0005!$A\u0008%Y\u0006T\u0018P\u001a7bO\u0012\nt\u000cJ3r)\u0009Yb\u0004\u0005\u0002\u00089%\u0011Q\u0004\u0003\u0002\u0005+:LG\u000fC\u0004 1\u0005\u0005\u0009\u0019A\n\u0002\u0007a$\u0013\u0007\u0003\u0004\"\u0001\u0001\u0006KaE\u0001\u000bM>|GE^1mk\u0016$\u0003bB\u0011\u0001\u0001\u0004%\u0009a\u0006\u0005\u0008I\u0001\u0001\r\u0011\"\u0001&\u000391wn\u001c\u0013wC2,X\rJ0%KF$\"a\u0007\u0014\u0009\u000f}\u0019\u0013\u0011!a\u0001'!9\u0001\u0006AA\u0001\n\u000b9\u0012a\u00014p_\u001e)!F\u0001E\u0001W\u00059A*\u0019>z\r>|\u0007C\u0001\u0009-\r\u0015\u0009!\u0001#\u0001.'\u0009ac\u0001C\u0003\u000eY\u0011\u0005q\u0006F\u0001,\u0011\u0019\u0009D\u0006)Q\u0005'\u0005YA\u0005\\1{s\u001ad\u0017m\u001a\u00133\u0011\u001d\u0009D\u00061A\u0005\u0002]Aq\u0001\u000e\u0017A\u0002\u0013\u0005Q'A\u0008%Y\u0006T\u0018P\u001a7bO\u0012\u0012t\u000cJ3r)\u0009Yb\u0007C\u0004 g\u0005\u0005\u0009\u0019A\n\u0009\rab\u0003\u0015)\u0003:\u0003)\u0011\u0017M\u001d\u0013wC2,X\r\n\u0009\u0003u\u0005s!aO \u0011\u0005qBQ\"A\u001f\u000b\u0005y\"\u0011A\u0002\u001fs_>$h(\u0003\u0002A\u0011\u00051\u0001K]3eK\u001aL!AQ\"\u0003\rM#(/\u001b8h\u0015\u0009\u0001\u0005\u0002C\u00049Y\u0001\u0007I\u0011A#\u0016\u0003eBqa\u0012\u0017A\u0002\u0013\u0005\u0001*\u0001\u0008cCJ$c/\u00197vK\u0012zF%Z9\u0015\u0005mI\u0005bB\u0010G\u0003\u0003\u0005\r!\u000f\u0005\u0008\u00172\n\u0009\u0011\"\u0002F\u0003\r\u0011\u0017M\u001d")
+  @Lscala/reflect/ScalaSignature;(bytes="\u0006\u0001\u00194A!\u0001\u0002\u0001\u000b\u00099A*\u0019>z\r>|'\"A\u0002\u0002\u000fq*W\u000e\u001d;z}\r\u00011C\u0001\u0001\u0007!\u00099!\"D\u0001\u0009\u0015\u0005I\u0011!B:dC2\u000c\u0017BA\u0006\u0009\u0005\u0019\u0009e.\u001f*fM\")Q\u0002\u0001C\u0001\u001d\u00051A(\u001b8jiz\"\u0012a\u0004\u0009\u0003!\u0001i\u0011A\u0001\u0005\u0008%\u0001\u0009\u0009\u0015)\u0003\u0014\u0003-!C.\u0019>zM2\u000cw\rJ\u0019\u0011\u0005\u001d!\u0012BA\u000b\u0009\u0005\rIe\u000e\u001e\u0005\u0008%\u0001\u0009\r\u0011\"\u0001\u0018+\u0005\u0019\u0002bB\r\u0001\u0003\u0004%\u0009AG\u0001\u0010I1\u000c'0\u001f4mC\u001e$\u0013g\u0018\u0013fcR\u00111D\u0008\u0009\u0003\u000fqI!!\u0008\u0005\u0003\u0009Us\u0017\u000e\u001e\u0005\u0008?a\u0009\u0009\u00111\u0001\u0014\u0003\rAH%\r\u0005\u0008C\u0001\u0009\u0009\u0015)\u0003\u0014\u0003-1wn\u001c\u0013wC2,X\r\n\u0019\u0009\u000f\u0005\u0002\u0011\u0019!C\u0001/!9A\u0005Aa\u0001\n\u0003)\u0013a\u00044p_\u00122\u0018\r\\;fIAzF%Z9\u0015\u0005m1\u0003bB\u0010$\u0003\u0003\u0005\ra\u0005\u0005\u0008Q\u0001\u0009\u0009\u0011\"\u0001\u0018\u0003\r1wn\u001c\u0005\u0008U\u0001\u0009\u0009\u0015)\u0003,\u0003-\u0011\u0017M\u001d\u0013wC2,X\rJ\u0019\u0011\u0005\u001da\u0013BA\u0017\u0009\u0005\u0019!u.\u001e2mK\"9!\u0006Aa\u0001\n\u0003yS#A\u0016\u0009\u000fE\u0002\u0011\u0019!C\u0001e\u0005y!-\u0019:%m\u0006dW/\u001a\u00132?\u0012*\u0017\u000f\u0006\u0002\u001cg!9q\u0004MA\u0001\u0002\u0004Y\u0003bB\u001b\u0001\u0003\u0003%\u0009aL\u0001\u0004E\u0006\u0014\u0008bB\u001c\u0001\u0003\u0003\u0006K\u0001O\u0001\u000cE\u0006THE^1mk\u0016$#\u0007\u0005\u0002\u0008s%\u0011!\u0008\u0003\u0002\u0008\u0005>|G.Z1o\u0011\u001d9\u0004!1A\u0005\u0002q*\u0012\u0001\u000f\u0005\u0008}\u0001\u0009\r\u0011\"\u0001@\u0003=\u0011\u0017M\u001f\u0013wC2,X\r\n\u001a`I\u0015\u000cHCA\u000eA\u0011\u001dyR(!AA\u0002aBqA\u0011\u0001\u0002\u0002\u0013\u0005A(A\u0002cCj<Q\u0001\u0012\u0002\u0009\u0002\u0015\u000bq\u0001T1{s\u001a{w\u000e\u0005\u0002\u0011\r\u001a)\u0011A\u0001E\u0001\u000fN\u0011aI\u0002\u0005\u0006\u001b\u0019#\u0009!\u0013\u000b\u0002\u000b\"91JRA!B\u0013\u0019\u0012a\u0003\u0013mCjLh\r\\1hIIBqa\u0013$B\u0002\u0013\u0005q\u0003C\u0004O\r\u0006\u0007I\u0011A(\u0002\u001f\u0011b\u0017M_=gY\u0006<GEM0%KF$\"a\u0007)\u0009\u000f}i\u0015\u0011!a\u0001'!9!KRA!B\u0013\u0019\u0016aC9vq\u00122\u0018\r\\;fIA\u0002\"\u0001V.\u000f\u0005UK\u0006C\u0001,\u0009\u001b\u00059&B\u0001-\u0005\u0003\u0019a$o\\8u}%\u0011!\u000cC\u0001\u0007!J,G-\u001a4\n\u0005qk&AB*ue&twM\u0003\u0002[\u0011!9!KRa\u0001\n\u0003yV#A*\u0009\u000f\u00054\u0015\u0019!C\u0001E\u0006y\u0011/\u001e=%m\u0006dW/\u001a\u00131?\u0012*\u0017\u000f\u0006\u0002\u001cG\"9q\u0004YA\u0001\u0002\u0004\u0019\u0006bB3G\u0003\u0003%\u0009aX\u0001\u0004cVD\u0008")
 
   ATTRIBUTE ScalaSig : unknown
 
@@ -14,30 +14,36 @@ public class LazyFoo {
   private I $lazyflag$1
 
   // access flags 0x2
-  private I foo$value$
+  private I foo$value$0
+
+  // access flags 0x2
+  private D bar$value$1
+
+  // access flags 0x2
+  private Z baz$value$2
 
   // access flags 0x9
-  public static bar()Ljava/lang/String;
+  public static qux()Ljava/lang/String;
     GETSTATIC LazyFoo$.MODULE$ : LLazyFoo$;
-    INVOKEVIRTUAL LazyFoo$.bar ()Ljava/lang/String;
+    INVOKEVIRTUAL LazyFoo$.qux ()Ljava/lang/String;
     ARETURN
     MAXSTACK = 1
     MAXLOCALS = 0
 
   // access flags 0x9
-  public static bar$value$_$eq(Ljava/lang/String;)V
+  public static qux$value$0_$eq(Ljava/lang/String;)V
     // parameter final  x$1
     GETSTATIC LazyFoo$.MODULE$ : LLazyFoo$;
     ALOAD 0
-    INVOKEVIRTUAL LazyFoo$.bar$value$_$eq (Ljava/lang/String;)V
+    INVOKEVIRTUAL LazyFoo$.qux$value$0_$eq (Ljava/lang/String;)V
     RETURN
     MAXSTACK = 2
     MAXLOCALS = 1
 
   // access flags 0x9
-  public static bar$value$()Ljava/lang/String;
+  public static qux$value$0()Ljava/lang/String;
     GETSTATIC LazyFoo$.MODULE$ : LLazyFoo$;
-    INVOKEVIRTUAL LazyFoo$.bar$value$ ()Ljava/lang/String;
+    INVOKEVIRTUAL LazyFoo$.qux$value$0 ()Ljava/lang/String;
     ARETURN
     MAXSTACK = 1
     MAXLOCALS = 0
@@ -60,8 +66,8 @@ public class LazyFoo {
     MAXSTACK = 1
     MAXLOCALS = 0
 
-  // access flags 0x11
-  public final foo()I
+  // access flags 0x1
+  public foo()I
    L0
     LINENUMBER 2 L0
     ALOAD 0
@@ -80,12 +86,76 @@ public class LazyFoo {
    L2
     LINENUMBER 3 L2
     ICONST_1
-    INVOKEVIRTUAL LazyFoo.foo$value$_$eq (I)V
+    INVOKEVIRTUAL LazyFoo.foo$value$0_$eq (I)V
    L1
     LINENUMBER 2 L1
    FRAME SAME
     ALOAD 0
-    INVOKEVIRTUAL LazyFoo.foo$value$ ()I
+    INVOKEVIRTUAL LazyFoo.foo$value$0 ()I
+    IRETURN
+   L3
+    LOCALVARIABLE this LLazyFoo; L0 L3 0
+    MAXSTACK = 3
+    MAXLOCALS = 1
+
+  // access flags 0x1
+  public bar()D
+   L0
+    LINENUMBER 2 L0
+    ALOAD 0
+    INVOKEVIRTUAL LazyFoo.$lazyflag$1 ()I
+    ICONST_2
+    IAND
+    ICONST_0
+    IF_ICMPEQ L1
+    ALOAD 0
+    ALOAD 0
+    INVOKEVIRTUAL LazyFoo.$lazyflag$1 ()I
+    ICONST_2
+    IOR
+    INVOKEVIRTUAL LazyFoo.$lazyflag$1_$eq (I)V
+    ALOAD 0
+   L2
+    LINENUMBER 4 L2
+    LDC 2.0
+    INVOKEVIRTUAL LazyFoo.bar$value$1_$eq (D)V
+   L1
+    LINENUMBER 2 L1
+   FRAME SAME
+    ALOAD 0
+    INVOKEVIRTUAL LazyFoo.bar$value$1 ()D
+    DRETURN
+   L3
+    LOCALVARIABLE this LLazyFoo; L0 L3 0
+    MAXSTACK = 3
+    MAXLOCALS = 1
+
+  // access flags 0x1
+  public baz()Z
+   L0
+    LINENUMBER 2 L0
+    ALOAD 0
+    INVOKEVIRTUAL LazyFoo.$lazyflag$1 ()I
+    ICONST_4
+    IAND
+    ICONST_0
+    IF_ICMPEQ L1
+    ALOAD 0
+    ALOAD 0
+    INVOKEVIRTUAL LazyFoo.$lazyflag$1 ()I
+    ICONST_4
+    IOR
+    INVOKEVIRTUAL LazyFoo.$lazyflag$1_$eq (I)V
+    ALOAD 0
+   L2
+    LINENUMBER 5 L2
+    ICONST_0
+    INVOKEVIRTUAL LazyFoo.baz$value$2_$eq (Z)V
+   L1
+    LINENUMBER 2 L1
+   FRAME SAME
+    ALOAD 0
+    INVOKEVIRTUAL LazyFoo.baz$value$2 ()Z
     IRETURN
    L3
     LOCALVARIABLE this LLazyFoo; L0 L3 0
@@ -95,7 +165,7 @@ public class LazyFoo {
   // access flags 0x1
   public <init>()V
    L0
-    LINENUMBER 6 L0
+    LINENUMBER 8 L0
     ALOAD 0
     INVOKESPECIAL java/lang/Object.<init> ()V
    L1
