@@ -73,6 +73,7 @@ object Scalaz {
       s"-Dpartest.root=${(baseDirectory in LocalProject("tests")).value}",
       s"-Dpartest.exec.in.process=true",
       s"-Dscalaz.plugin.jar=${(packageBin in Compile in LocalProject("plugin")).value}",
+      s"-Duser.country=US",
     ),
     testFrameworks += new TestFramework("scala.tools.partest.sbt.Framework"),
     definedTests in Test +=
