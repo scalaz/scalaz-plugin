@@ -13,12 +13,11 @@ install:
 #- gem install jekyll -v 3.8.2
 script:
 - sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck test
-#- if [[ "$TRAVIS_PULL_REQUEST" = "false" && "$TRAVIS_BRANCH" = "series/8.0.x" ]]; then sbt publish; fi
+- if [[ "$TRAVIS_PULL_REQUEST" = "false" && "$TRAVIS_BRANCH" = "master" ]]; then sbt publish; fi
 env:
   global:
-  - secure: f9sDrym/MfYK1hBBSaILMxn4VCfyzJREqpuGXhEggrdZpYTNjp8GMXrqKfla3AwVAuWCveXk9u+skUYqKQ6LTG7RdQS5PzA2I9kx8afNRA5nxMmVQjuCKYM0/aF4egY5i98tGXG0NiMO3t72XuxtR+OeWLysUVB8hoNghpOOVMw=
-  - secure: PPURD7/Lj6+kqE342Ty99XhO5SR7GlrakSbZeKm5RKXS2Q5yFrexdf+UcS3KUbq6LaWnH75q+UgC2mcRMIspRmz37CtVXkGbJYp3VBYFJbmIga+w0bBVvlSw8QWIGhdz3xnOOuiEYpgeOKnAzShr59HYKG2O90jlMdt4cPRUrwg=
-cache:
+    - secure: MnKEc3GKeg/mx+gRA/lsVkcV/hSCls3/5ilq5pNq4JYd3JuEk8i3U56BkwNzFQowZztRKrS1KlgAI3nNWzpFTDPmCvC/feuKIOVHd3CRuezPQh5jitAAc/cLPALKakDuwMnU4bqdDWR59sJi4oYTt05n7lWnJDXPGo7rHraHiZ/bCPrJ5hvxxGPMAFCeQHFD0C1YEl8GTFtGBmGrSk6fU6sIpzp3a+T2/iXXBm6B8hqpwcUh1IENWW1Z40qqds7kwH2OY3FEIO9eDoB+BUdnDR6uTqgMwF6owWK2pQH/mEDIlEvB8TVVpSnAyp5wxzx9WNAxc0FRWkqtYXk9DiX4ScV0ACd4/thqbDM4QqCLkrxlLHWlRXfELdmhhHgkaz/bAnAPt7gR3B7ujrOFvBso24Zjf0jzmh0enUkYZzsV3wRq5D8Gpy9JEeTtKUCQQnLScb5M0bLCvmea3i3sNDF+EvuWvoo/3SdfES4qn0KH32JIz6Jb/80RRMx8cpBpxWhmoKd1QUCNszQR33MhM7xwjwfdtKGxs6/qTFF2+cKbxJf0CDCFijrSyANs+oB5J+D2dHOY4c0PjyP4zO6EGZNasDPN0lK2zV3ejtKUekfeWc2oToSu2e9HVPpSiR0AOmfeVkCY86CY0rSadbvEqoL+JJKFN0NQsC7GYsyo8XcZDfI=
+    - secure: UnbvLVfOIVrovJXLD9NaIyUqjK6Ntyh6lRjUDHm5zzMtQx0MUvbtPGdrsxPDPaE7Y2u0Nl05AS7LyrEY37vBro0vOhLJiVBHwL2y4MzSF+YHwlqeY3rkZXcNgPG4QTudlbsndcFLi0eY13TZMcqEfI948/HKbvX11oBJGIWNs0EOiH5WabTj5jIQ6Xh+SXAC6E6WOLx0fgqfPjBQDTvXvZBgV7ejwRJfuvynL2Evco0GWBQ3yBA7+p6knNrfz9LPs2hcFrC2rxE91rNnm/pjUKu08E8ZEJGyfO1v//rqH30Qt2KYWQd35ELWSIMUQHSWpBO5sQ84GAKArOt/txlo/4wfWkBwhVA3whp/PCXIUqpftfvLGiorW/eXNGFdeR9VORvRlGzLp3kpfMN7keyv3tgwFw3S231hYiRG+IraUhdLz/sHCZ47oFpWWS7EBs14VON3kHHX02HS7/EpcbUiM2fwq1QClqRX5DJ7wOz+m5a9LIdmwY2Y8+eBlck6nZjDm0ZMbTj36yeDD4sbLOXySE0hJGlyuo1uugdZUitE55itmRyFSyoLETjK/TQOyarG1P+WpDUxRpEfofyojn4WKWJ2m2Uj52Ne19Uvl1NPWbh/oJf484pf7/FChovhVNp/wd6XzFof+tloZL3gCpcOPqsr+/EwToOAf2ixPEaupLY=cache:
   directories:
   - "$HOME/.ivy2/cache"
   - "$HOME/.sbt/launchers"

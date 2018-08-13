@@ -4,6 +4,25 @@ cancelable in Global := true
 
 organization in ThisBuild := "org.scalaz"
 
+publishTo in ThisBuild := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+
+dynverSonatypeSnapshots in ThisBuild := true
+
+lazy val sonataCredentials = for {
+  username <- sys.env.get("SONATYPE_USERNAME")
+  password <- sys.env.get("SONATYPE_PASSWORD")
+} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)
+
+credentials in ThisBuild ++= sonataCredentials.toSeq
+
+licenses in ThisBuild += ("LGPL-3.0", url("https://opensource.org/licenses/LGPL-3.0"))
+
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 scalacOptions ++= List("-Xplugin-require:macroparadise")
 
@@ -15,7 +34,6 @@ lazy val metaJS  = meta.js
 lazy val plugin = (project in file("plugin"))
   .settings(
     name := "scalaz-plugin",
-    licenses += ("LGPL-3.0", url("https://opensource.org/licenses/LGPL-3.0")),
     crossVersion := CrossVersion.full,
     libraryDependencies ++= List(
       scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
