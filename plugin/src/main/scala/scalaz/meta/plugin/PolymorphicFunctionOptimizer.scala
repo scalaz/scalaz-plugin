@@ -1,5 +1,7 @@
 package scalaz.meta.plugin
 
+import java.io.{ByteArrayOutputStream, PrintWriter, StringWriter}
+
 import scala.tools.nsc.Global
 import scala.tools.nsc.ast.TreeDSL
 import scala.tools.nsc.plugins.PluginComponent
@@ -46,11 +48,16 @@ abstract class PolymorphicFunctionOptimizer
     }
     .sortBy(_.getName)
 
-  def showSymbol(s: Symbol): String =
-    s.toString() + "[" + symbolMethods
-      .filter(m => m.invoke(s).asInstanceOf[Boolean])
-      .map(_.getName)
-      .mkString(", ") + "]"
+  def showSymbol(s: Symbol): String = {
+    if (s == null) "NullSymbol"
+    else {
+      s.toString() + "[" + symbolMethods
+        .filter(m => m.invoke(s).asInstanceOf[Boolean])
+        .map(_.getName)
+        .mkString(", ") + "]"
+    }
+  }
+
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
     def rewriteMethod(owner: Symbol, fun: DefDef): List[Tree] = {
@@ -166,11 +173,11 @@ abstract class PolymorphicFunctionOptimizer
     def processBody(owner: Symbol, tmpl: Template): Template = {
       val body = tmpl.body
 
-      val tmplMethods = body.map(_.symbol).collect {
-        case s
-            if s.isMethod && !s.isConstructor &&
-              s.asMethod.typeParams.nonEmpty && s.asMethod.paramLists.isEmpty =>
-          s
+      val tmplMethods = body.map(_.symbol).filter { s =>
+        if (s != null && s.isMethod && !s.isConstructor) {
+          val m = s.asMethod
+          m.typeParams.nonEmpty && m.paramLists.isEmpty
+        } else false
       }
 
       val superMethods = tmpl.parents.flatMap { p =>
@@ -227,7 +234,11 @@ abstract class PolymorphicFunctionOptimizer
         }
       } catch {
         case NonFatal(e) =>
-          e.printStackTrace(System.err)
+          val sw = new StringWriter()
+          val pw = new PrintWriter(sw)
+          e.printStackTrace(pw)
+          globalError(tree.pos, sw.toString)
+
           super.transform(tree)
       }
   }
