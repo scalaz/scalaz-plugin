@@ -140,7 +140,7 @@ abstract class OrphanChecker
       case Apply(fun, args) =>
         val tpe = tree.tpe.dealias
 
-        if (!(tpe <:< TypeclassType)) return
+        if (!(tpe <:< TypeclassType) || tpe <:< definitions.NothingTpe) return
 
         val enclosing: Set[Symbol] =
           Set(currentOwner.ownerChain: _*)
