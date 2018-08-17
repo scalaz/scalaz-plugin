@@ -14,8 +14,8 @@ public final class Child$ extends Parent  {
   public static LChild$; MODULE$
 
   // access flags 0x11
-  // signature LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String>
+  // signature LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object>
   public final LFoo; local$1
 
   // access flags 0x9
@@ -27,8 +27,8 @@ public final class Child$ extends Parent  {
     MAXLOCALS = 0
 
   // access flags 0x11
-  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String> someFunc<X>()
+  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object> someFunc<X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 9 L0
@@ -50,7 +50,7 @@ public final class Child$ extends Parent  {
     PUTSTATIC Child$.MODULE$ : LChild$;
     ALOAD 0
     ALOAD 0
-    INVOKESPECIAL Parent.someFunc ()LFoo;
+    INVOKESPECIAL Child$.someFunc ()LFoo;
     PUTFIELD Child$.local$1 : LFoo;
     RETURN
    L1

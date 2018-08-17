@@ -12,13 +12,15 @@ public final class TestStatic$$anon$1 extends Parent  {
   ATTRIBUTE ScalaInlineInfo : unknown
   // access flags 0x11
   public final INNERCLASS TestStatic$$anon$1 null null
+  // access flags 0x11
+  public final INNERCLASS TestStatic$$anon$3 null null
 
   // access flags 0x12
   private final I a
 
   // access flags 0x11
-  // signature LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String>
+  // signature LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object>
   public final LFoo; local$1
 
   // access flags 0x1
@@ -34,8 +36,8 @@ public final class TestStatic$$anon$1 extends Parent  {
     MAXLOCALS = 1
 
   // access flags 0x11
-  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String> someFunc<X>()
+  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object> someFunc<X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 10 L0
@@ -62,7 +64,7 @@ public final class TestStatic$$anon$1 extends Parent  {
     LINENUMBER 10 L2
     ALOAD 0
     ALOAD 0
-    INVOKESPECIAL Parent.someFunc ()LFoo;
+    INVOKESPECIAL TestStatic$$anon$3.someFunc ()LFoo;
     PUTFIELD TestStatic$$anon$1.local$1 : LFoo;
     RETURN
    L3
@@ -85,15 +87,17 @@ public final class TestStatic$$anon$2 extends Parent  {
   ATTRIBUTE ScalaInlineInfo : unknown
   // access flags 0x11
   public final INNERCLASS TestStatic$$anon$2 null null
+  // access flags 0x11
+  public final INNERCLASS TestStatic$$anon$3 null null
 
   // access flags 0x11
-  // signature LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String>
+  // signature LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object>
   public final LFoo; local$2
 
   // access flags 0x11
-  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String> someFunc<X>()
+  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object> someFunc<X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 13 L0
@@ -113,7 +117,7 @@ public final class TestStatic$$anon$2 extends Parent  {
     INVOKESPECIAL Parent.<init> ()V
     ALOAD 0
     ALOAD 0
-    INVOKESPECIAL Parent.someFunc ()LFoo;
+    INVOKESPECIAL TestStatic$$anon$3.someFunc ()LFoo;
     PUTFIELD TestStatic$$anon$2.local$2 : LFoo;
     RETURN
    L1
@@ -138,13 +142,13 @@ public final class TestStatic$$anon$3 extends Parent  {
   public final INNERCLASS TestStatic$$anon$3 null null
 
   // access flags 0x11
-  // signature LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String>
+  // signature LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object>
   public final LFoo; local$3
 
   // access flags 0x11
-  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String> someFunc<X>()
+  // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
+  // declaration: Foo<java.lang.Object> someFunc<X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 17 L0
@@ -164,7 +168,7 @@ public final class TestStatic$$anon$3 extends Parent  {
     INVOKESPECIAL Parent.<init> ()V
     ALOAD 0
     ALOAD 0
-    INVOKESPECIAL Parent.someFunc ()LFoo;
+    INVOKESPECIAL TestStatic$$anon$3.someFunc ()LFoo;
     PUTFIELD TestStatic$$anon$3.local$3 : LFoo;
     RETURN
    L1
