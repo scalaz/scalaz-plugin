@@ -30,7 +30,7 @@ trait Utils {
     }
     .sortBy(_.getName)
 
-  def showSymbol(s: Symbol): String = {
+  def showSymbol(s: Symbol): String =
     if (s == null) "NullSymbol"
     else {
       s.toString() + "[" + symbolMethods
@@ -38,13 +38,12 @@ trait Utils {
         .map(_.getName)
         .mkString(", ") + "]"
     }
-  }
 
   def isStaticScope(sym: Symbol, currentOwner: Symbol): Boolean = {
     def go(syms: List[Symbol]): (Boolean, Boolean) = syms match {
       case s :: ss
-        if s.isClass && !s.isModuleClass
-          && !s.isPackageClass && !s.isPackageObjectClass =>
+          if s.isClass && !s.isModuleClass
+            && !s.isPackageClass && !s.isPackageObjectClass =>
         val (staticScope, packageScope) = go(ss)
         if (s.isAnonymousClass) {
           (staticScope || packageScope, false)
@@ -78,18 +77,17 @@ trait Utils {
     go(sym :: currentOwner.ownerChain)._1
   }
 
-  def isParameterlessPolymorphicMethod(s: Symbol): Boolean = {
+  def isParameterlessPolymorphicMethod(s: Symbol): Boolean =
     if (s != null && s.isMethod && !s.isConstructor) {
       val m = s.asMethod
       m.typeParams.nonEmpty && m.paramLists.isEmpty
     } else false
-  }
 
   /**
-    *
-    * @param tmpl
-    * @return
-    */
+   *
+   * @param tmpl
+   * @return
+   */
   def collectParameterlessPolymorphicMethods(tmpl: Template): List[MethodSymbol] =
     tmpl.body.map(_.symbol).filter(isParameterlessPolymorphicMethod).map(_.asMethod)
 }

@@ -1,11 +1,11 @@
 package scalaz.meta.plugin
 
-import java.io.{PrintWriter, StringWriter}
+import java.io.{ PrintWriter, StringWriter }
 
 import scala.tools.nsc.Global
 import scala.tools.nsc.ast.TreeDSL
 import scala.tools.nsc.plugins.PluginComponent
-import scala.tools.nsc.transform.{Transform, TypingTransformers}
+import scala.tools.nsc.transform.{ Transform, TypingTransformers }
 import scala.util.control.NonFatal
 
 abstract class PolymorphicFunctionOptimizer
@@ -13,13 +13,12 @@ abstract class PolymorphicFunctionOptimizer
     with Transform
     with TypingTransformers
     with TreeDSL
-    with Utils
-{
+    with Utils {
   val global: Global
   val scalazDefns: Definitions { val global: PolymorphicFunctionOptimizer.this.global.type }
 
   import global._
-  import scalazDefns.{global => _}
+  import scalazDefns.{ global => _ }
 
   override val phaseName: String       = "scalaz-polyopt"
   override val runsAfter: List[String] = "typer" :: Nil
@@ -34,9 +33,7 @@ abstract class PolymorphicFunctionOptimizer
       val name1 = freshTermName("local$")(currentFreshNameCreator)
 
       def substitute(tree: Tree): Tree =
-        tree.substituteTypes(
-          fun.tparams.map(_.symbol),
-          fun.tparams.map(_ => definitions.AnyTpe))
+        tree.substituteTypes(fun.tparams.map(_.symbol), fun.tparams.map(_ => definitions.AnyTpe))
 
       val tpt1 = substitute(fun.tpt)
       val rhs1 = substitute(fun.rhs)
@@ -111,15 +108,17 @@ abstract class PolymorphicFunctionOptimizer
 
       // First we find all non-constructor methods that don't have
       // any (non-type) parameters.
-      val methods      = collectParameterlessPolymorphicMethods(tmpl)
+      val methods = collectParameterlessPolymorphicMethods(tmpl)
 
       val superMethods = owner.tpe.members
         .filter(_.isMethod)
         .map(_.asMethod)
         .filter(isParameterlessPolymorphicMethod)
-        .filter(s =>
-          s.name.toString != "asInstanceOf"
-          && s.name.toString != "isInstanceOf")
+        .filter(
+          s =>
+            s.name.toString != "asInstanceOf"
+              && s.name.toString != "isInstanceOf"
+        )
         .filter(s => !methods.contains(s))
         .filter(s => !s.isEffectivelyFinal)
 
@@ -149,11 +148,13 @@ abstract class PolymorphicFunctionOptimizer
     override def transform(tree: Tree): Tree =
       try {
         tree match {
-          case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _)) if isStaticScope(cd.symbol, currentOwner) =>
+          case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _))
+              if isStaticScope(cd.symbol, currentOwner) =>
             super.transform(
               treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl))
             )
-          case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _)) if isStaticScope(mod.symbol, currentOwner) =>
+          case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _))
+              if isStaticScope(mod.symbol, currentOwner) =>
             super.transform(
               treeCopy
                 .ModuleDef(tree, mod.mods, mod.name, processBody(mod.symbol.moduleClass, tmpl))
