@@ -1,5 +1,7 @@
 package scalaz.meta.plugin
 
+import java.io.{ PrintWriter, StringWriter }
+
 import scala.tools.nsc.Global
 import scala.tools.nsc.ast.TreeDSL
 import scala.tools.nsc.plugins.PluginComponent
@@ -10,11 +12,13 @@ abstract class PolymorphicFunctionOptimizer
     extends PluginComponent
     with Transform
     with TypingTransformers
-    with TreeDSL {
+    with TreeDSL
+    with Utils {
   val global: Global
   val scalazDefns: Definitions { val global: PolymorphicFunctionOptimizer.this.global.type }
 
-  import global._, scalazDefns.{ global => _, _ }
+  import global._
+  import scalazDefns.{ global => _ }
 
   override val phaseName: String       = "scalaz-polyopt"
   override val runsAfter: List[String] = "typer" :: Nil
@@ -22,38 +26,10 @@ abstract class PolymorphicFunctionOptimizer
   def newTransformer(unit: CompilationUnit): Transformer =
     new MyTransformer(unit)
 
-  def isSelect(tree: Tree): Boolean = tree match {
-    case TypeApply(fun, args) => isSelect(fun)
-    case Select(qualifier, _) => isSelect(qualifier)
-    case Ident(a)             => true
-    case This(_)              => true
-    case Super(qual, _)       => isSelect(qual)
-    case _                    => false
-  }
-
-  val symbolMethods = classOf[Symbol].getMethods.toList
-    .filter(
-      m =>
-        m.getName.startsWith("is") &&
-          m.getReturnType == classOf[Boolean] &&
-          java.lang.reflect.Modifier.isPublic(m.getModifiers) &&
-          !java.lang.reflect.Modifier.isStatic(m.getModifiers) &&
-          m.getParameterCount == 0
-    )
-    .map { m =>
-      m.setAccessible(true)
-      m
-    }
-    .sortBy(_.getName)
-
-  def showSymbol(s: Symbol): String =
-    s.toString() + "[" + symbolMethods
-      .filter(m => m.invoke(s).asInstanceOf[Boolean])
-      .map(_.getName)
-      .mkString(", ") + "]"
-
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
     def rewriteMethod(owner: Symbol, fun: DefDef): List[Tree] = {
+      devWarning(s"rewriting ${fun.symbol} in $owner")
+
       val name1 = freshTermName("local$")(currentFreshNameCreator)
 
       def substitute(tree: Tree): Tree =
@@ -84,6 +60,8 @@ abstract class PolymorphicFunctionOptimizer
     }
 
     def createSuperCall(owner: Symbol, fun: MethodSymbol): List[Tree] = {
+      devWarning(s"rewriting $fun in $owner as super call")
+
       val valName = freshTermName("local$")(currentFreshNameCreator)
 
       val defType = fun.typeSignature
@@ -100,7 +78,7 @@ abstract class PolymorphicFunctionOptimizer
 
       val t1 = Select(
         TypeApply(
-          Select(Super(This(owner), fun.owner.asType.name), fun),
+          Select(Super(This(owner), ""), fun),
           fun.typeParams.map(_ => TypeTree(definitions.AnyTpe))
         ),
         "asInstanceOf"
@@ -125,70 +103,27 @@ abstract class PolymorphicFunctionOptimizer
       List(localTyper.typedValDef(valDefTree), localTyper.typedDefDef(defTree))
     }
 
-    def isStaticScope(sym: Symbol): Boolean = {
-      def go(syms: List[Symbol]): (Boolean, Boolean) = syms match {
-        case s :: ss
-            if s.isClass && !s.isModuleClass
-              && !s.isPackageClass && !s.isPackageObjectClass =>
-          val (staticScope, packageScope) = go(ss)
-          if (s.isAnonymousClass) {
-            (staticScope || packageScope, false)
-          } else (false, false)
-
-        case s :: ss if s.isPackageClass =>
-          (false, true)
-
-        case s :: ss if s.isModuleOrModuleClass =>
-          val (staticScope, packageScope) = go(ss)
-          (staticScope || packageScope, false)
-
-        case s :: ss if s.isVal && !s.isParameter =>
-          val (staticScope, packageScope) = go(ss)
-          (staticScope || packageScope, false)
-
-        case s :: ss if s.isVar && !s.isParameter =>
-          (false, false)
-
-        case s :: ss if s.isParamWithDefault =>
-          (false, false)
-
-        case s :: ss if s.isMethod =>
-          (false, false)
-
-        case s :: ss =>
-          System.err.println(showSymbol(s))
-          throw new Error()
-      }
-
-      go(sym :: currentOwner.ownerChain)._1
-    }
-
     def processBody(owner: Symbol, tmpl: Template): Template = {
       val body = tmpl.body
 
-      val tmplMethods = body.map(_.symbol).collect {
-        case s
-            if s.isMethod && !s.isConstructor &&
-              s.asMethod.typeParams.nonEmpty && s.asMethod.paramLists.isEmpty =>
-          s
-      }
+      // First we find all non-constructor methods that don't have
+      // any (non-type) parameters.
+      val methods = collectParameterlessPolymorphicMethods(tmpl)
 
-      val superMethods = tmpl.parents.flatMap { p =>
-        val tmplOverrides = tmplMethods.map { m =>
-          m.overriddenSymbol(p.symbol)
-        }
+      val superMethods = owner.tpe.members
+        .filter(_.isMethod)
+        .map(_.asMethod)
+        .filter(isParameterlessPolymorphicMethod)
+        .filter(
+          s =>
+            s.name.toString != "asInstanceOf"
+              && s.name.toString != "isInstanceOf"
+        )
+        .filter(s => !methods.contains(s))
+        .filter(s => !s.isEffectivelyFinal)
 
-        p.tpe.members.flatMap {
-          case s
-              if s.isMethod && !s.isFinal && !s.isConstructor &&
-                s.asMethod.typeParams.nonEmpty && s.asMethod.paramLists.isEmpty &&
-                !tmplOverrides.contains(s.asMethod) =>
-            List(
-              s.asMethod
-                .substInfo(p.tpe.typeConstructor.typeParams, p.tpe.typeArgs.map(_.typeSymbol))
-            )
-          case _ => List()
-        }
+      superMethods.foreach { s =>
+        s.owner = owner
       }
 
       treeCopy.Template(
@@ -197,9 +132,8 @@ abstract class PolymorphicFunctionOptimizer
         tmpl.self,
         body.flatMap {
           case fun @ DefDef(mods, name, tparams, vparamss, tpt, rhs)
-              if !mods.isSynthetic && !fun.symbol.isConstructor && !fun.symbol.isAccessor && !isSelect(
-                rhs
-              ) =>
+              if !mods.isSynthetic && !fun.symbol.isConstructor && !fun.symbol.isAccessor
+                && !isSelect(rhs) =>
             if (tparams.nonEmpty && vparamss.isEmpty) {
               rewriteMethod(owner, fun)
             } else List(fun)
@@ -214,11 +148,13 @@ abstract class PolymorphicFunctionOptimizer
     override def transform(tree: Tree): Tree =
       try {
         tree match {
-          case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _)) if isStaticScope(cd.symbol) =>
+          case cd @ ClassDef(_, _, _, tmpl @ Template(_, _, _))
+              if isStaticScope(cd.symbol, currentOwner) =>
             super.transform(
               treeCopy.ClassDef(tree, cd.mods, cd.name, cd.tparams, processBody(cd.symbol, tmpl))
             )
-          case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _)) if isStaticScope(mod.symbol) =>
+          case mod @ ModuleDef(_, _, tmpl @ Template(_, _, _))
+              if isStaticScope(mod.symbol, currentOwner) =>
             super.transform(
               treeCopy
                 .ModuleDef(tree, mod.mods, mod.name, processBody(mod.symbol.moduleClass, tmpl))
@@ -227,7 +163,11 @@ abstract class PolymorphicFunctionOptimizer
         }
       } catch {
         case NonFatal(e) =>
-          e.printStackTrace(System.err)
+          val sw = new StringWriter()
+          val pw = new PrintWriter(sw)
+          e.printStackTrace(pw)
+          globalError(tree.pos, sw.toString)
+
           super.transform(tree)
       }
   }
