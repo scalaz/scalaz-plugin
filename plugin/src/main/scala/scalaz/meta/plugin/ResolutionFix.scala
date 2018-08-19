@@ -1,9 +1,80 @@
 package scalaz.meta.plugin
 
+import java.lang.reflect.{Field, Modifier}
+
 import scala.collection.mutable
-import scala.reflect.ClassTag
+import scala.tools.nsc.Global
 import scala.tools.nsc.typechecker.Analyzer
-import scala.tools.nsc.{ Global, SubComponent }
+
+object FieldBuster {
+  def getSuperclasses[T](cls: Class[T]): List[Class[_]] = {
+    val sc = cls.getSuperclass
+    if (sc == null) Nil
+    else sc :: getSuperclasses(sc)
+  }
+
+  def getAllClassFields[T](cls: Class[T]): List[Field] =
+    (cls :: getSuperclasses(cls)).flatMap(c => c.getDeclaredFields)
+
+  final class FieldLens[U](val get: () => U, val set: U => Unit)
+
+  def getFields(ref: AnyRef): List[FieldLens[AnyRef]] =
+    if (ref eq null) Nil
+    else ref match {
+      case array: Array[AnyRef] =>
+        array.toList.filter(_ != null).zipWithIndex.map { case (r, i) =>
+          new FieldLens[AnyRef](() => r, x => { array(i) = x })
+        }
+      case _ =>
+        getAllClassFields(ref.getClass)
+          .filter(f => !Modifier.isStatic(f.getModifiers))
+          .filter(f => !f.getType.isPrimitive)
+          .map { f =>
+            f.setAccessible(true)
+            new FieldLens[AnyRef](() => f.get(ref), x => f.set(ref, x))
+          }
+    }
+
+  type Path = List[String]
+
+  final class Wrapper(val value: AnyRef) {
+    override def equals(that: Any): Boolean =
+      if (!that.isInstanceOf[Wrapper]) false
+      else that.asInstanceOf[Wrapper].value eq this.value
+
+    override def hashCode(): Int =
+      System.identityHashCode(value)
+  }
+
+  def replaceAll(root: AnyRef, oldRef: AnyRef, newRef: AnyRef): Unit = {
+    val visited = mutable.HashSet.empty[Wrapper]
+    val queue = new java.util.ArrayDeque[AnyRef]
+
+    def visit(value: AnyRef): Unit = {
+      if (!(value eq null)) {
+        val valueW = new Wrapper(value)
+        if (!visited.contains(valueW)) {
+          visited.add(valueW)
+          queue.addLast(value)
+        }
+      }
+    }
+
+    visit(root)
+    visit(oldRef)
+    visit(newRef)
+
+    while (queue.size() > 0) {
+      val node = queue.pop()
+
+      getFields(node).foreach { field =>
+        val value: AnyRef = field.get()
+        if (value eq oldRef) field.set(newRef)
+        visit(value)
+      }
+    }
+  }
+}
 
 abstract class ResolutionFix {
   val global: Global
@@ -73,40 +144,13 @@ abstract class ResolutionFix {
       }
   }
 
-  def valSetter[T: ClassTag, U](name: String): (T, U) => Unit = {
-    val cls   = implicitly[ClassTag[T]].runtimeClass
-    val field = cls.getDeclaredField(name)
-    field.setAccessible(true)
-    (t, u) =>
-      field.set(t, u)
-  }
-
-  def valGetter[T: ClassTag, U](name: String): T => U = {
-    val cls   = implicitly[ClassTag[T]].runtimeClass
-    val field = cls.getDeclaredField(name)
-    field.setAccessible(true)
-    t =>
-      field.get(t).asInstanceOf[U]
-  }
-
-  def getGlobalPhasesSet =
-    valGetter[Global, mutable.HashSet[SubComponent]]("phasesSet")
-  def getGlobalPhasesDescMap =
-    valGetter[Global, mutable.Map[SubComponent, String]]("phasesDescMap")
-  def setGlobalAnalyzer =
-    valSetter[Global, Analyzer]("analyzer")
-
   def init(): Unit = {
-    val phases     = getGlobalPhasesSet(global)
-    val phaseDescs = getGlobalPhasesDescMap(global)
-
-    val oldTyper = phases.find(s => s.phaseName == "typer").get
-    val oldDesc  = phaseDescs(oldTyper)
-
-    phases.remove(oldTyper)
-    phaseDescs.remove(oldTyper)
-    setGlobalAnalyzer(global, newAnalyzer)
-    phases.add(newAnalyzer.typerFactory)
-    phaseDescs.put(newAnalyzer.typerFactory, oldDesc)
+    try {
+      FieldBuster.replaceAll(global, global.analyzer, newAnalyzer)
+    } catch {
+      case e: Throwable =>
+        e.printStackTrace()
+        throw e
+    }
   }
 }
