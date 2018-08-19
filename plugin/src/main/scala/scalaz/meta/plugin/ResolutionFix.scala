@@ -1,6 +1,6 @@
 package scalaz.meta.plugin
 
-import java.lang.reflect.{Field, Modifier}
+import java.lang.reflect.{ Field, Modifier }
 
 import scala.collection.mutable
 import scala.tools.nsc.Global
@@ -20,20 +20,22 @@ object FieldBuster {
 
   def getFields(ref: AnyRef): List[FieldLens[AnyRef]] =
     if (ref eq null) Nil
-    else ref match {
-      case array: Array[AnyRef] =>
-        array.toList.filter(_ != null).zipWithIndex.map { case (r, i) =>
-          new FieldLens[AnyRef](() => r, x => { array(i) = x })
-        }
-      case _ =>
-        getAllClassFields(ref.getClass)
-          .filter(f => !Modifier.isStatic(f.getModifiers))
-          .filter(f => !f.getType.isPrimitive)
-          .map { f =>
-            f.setAccessible(true)
-            new FieldLens[AnyRef](() => f.get(ref), x => f.set(ref, x))
+    else
+      ref match {
+        case array: Array[AnyRef] =>
+          array.toList.filter(_ != null).zipWithIndex.map {
+            case (r, i) =>
+              new FieldLens[AnyRef](() => r, x => { array(i) = x })
           }
-    }
+        case _ =>
+          getAllClassFields(ref.getClass)
+            .filter(f => !Modifier.isStatic(f.getModifiers))
+            .filter(f => !f.getType.isPrimitive)
+            .map { f =>
+              f.setAccessible(true)
+              new FieldLens[AnyRef](() => f.get(ref), x => f.set(ref, x))
+            }
+      }
 
   type Path = List[String]
 
@@ -48,9 +50,9 @@ object FieldBuster {
 
   def replaceAll(root: AnyRef, oldRef: AnyRef, newRef: AnyRef): Unit = {
     val visited = mutable.HashSet.empty[Wrapper]
-    val queue = new java.util.ArrayDeque[AnyRef]
+    val queue   = new java.util.ArrayDeque[AnyRef]
 
-    def visit(value: AnyRef): Unit = {
+    def visit(value: AnyRef): Unit =
       if (!(value eq null)) {
         val valueW = new Wrapper(value)
         if (!visited.contains(valueW)) {
@@ -58,7 +60,6 @@ object FieldBuster {
           queue.addLast(value)
         }
       }
-    }
 
     visit(root)
     visit(oldRef)
@@ -144,7 +145,7 @@ abstract class ResolutionFix {
       }
   }
 
-  def init(): Unit = {
+  def init(): Unit =
     try {
       FieldBuster.replaceAll(global, global.analyzer, newAnalyzer)
     } catch {
@@ -152,5 +153,4 @@ abstract class ResolutionFix {
         e.printStackTrace()
         throw e
     }
-  }
 }
