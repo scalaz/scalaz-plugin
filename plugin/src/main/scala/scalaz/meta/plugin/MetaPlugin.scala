@@ -7,6 +7,9 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
   val name        = "scalaz"
   val description = "scalaz"
 
+  override def init(options: List[String], error: String => Unit): Boolean =
+    true
+
   val scalazDefns = new {
     val global: plugin.global.type = plugin.global
   } with Definitions
