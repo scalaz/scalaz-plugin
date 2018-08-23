@@ -27,6 +27,9 @@ object FieldBuster {
         },
         (s, z) =>
           s match {
+            case SelectIndex(index) =>
+              val ref = z.get().asInstanceOf[Array[AnyRef]]
+              new FieldLens[AnyRef](() => ref(index), x => { ref(index) = x })
             case SelectField(name) =>
               val ref = z.get()
               // println(s"$ref $name")
@@ -41,18 +44,6 @@ object FieldBuster {
     if (ref eq null) Nil
     else
       ref match {
-        case coll: mutable.Map[AnyRef, AnyRef] =>
-          coll.toList.map {
-            case (k, w) =>
-              SelectMapKey(k, w) -> new FieldLens[AnyRef](() => coll(k), x => { coll(k) = x })
-          }
-
-        case coll: mutable.Seq[AnyRef] =>
-          coll.toList.zipWithIndex.map {
-            case (_, i) =>
-              SelectIndex(i) -> new FieldLens[AnyRef](() => coll(i), x => { coll(i) = x })
-          }
-
         case coll: Array[AnyRef] =>
           coll.toList.zipWithIndex.map {
             case (_, i) =>
@@ -72,8 +63,7 @@ object FieldBuster {
   final case class SelectField(name: String) extends Select {
     override def toString: String = "SelectField(\"" + name + "\")"
   }
-  final case class SelectMapKey(name: AnyRef) extends Select
-  final case class SelectIndex(index: Int)    extends Select
+  final case class SelectIndex(index: Int) extends Select
 
   sealed abstract class Origin
   final case object Root   extends Origin
@@ -222,7 +212,7 @@ abstract class ResolutionFix {
     try {
       // Run this to update the command list.
       // for (p <- FieldBuster.replaceAll(global, global.analyzer, newAnalyzer)) {
-      //   println(s"$p,")
+      // println(s"$p,")
       // }
 
       for (c <- commands) {
