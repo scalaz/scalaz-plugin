@@ -1,9 +1,127 @@
 package scalaz.meta.plugin
 
+import java.lang.reflect.{ Field, Modifier }
+
 import scala.collection.mutable
-import scala.reflect.ClassTag
+import scala.tools.nsc.Global
 import scala.tools.nsc.typechecker.Analyzer
-import scala.tools.nsc.{ Global, SubComponent }
+
+object FieldBuster {
+  def getSuperclasses[T](cls: Class[T]): List[Class[_]] = {
+    val sc = cls.getSuperclass
+    if (sc == null) Nil
+    else sc :: getSuperclasses(sc)
+  }
+
+  def getAllClassFields[T](cls: Class[T]): List[Field] =
+    (cls :: getSuperclasses(cls)).flatMap(c => c.getDeclaredFields)
+
+  final class FieldLens[U](val get: () => U, val set: U => Unit)
+  object FieldLens {
+    def get(root: AnyRef, oldRef: AnyRef, newRef: AnyRef, path: Path): FieldLens[AnyRef] =
+      path.fold[FieldLens[AnyRef]](
+        {
+          case Root   => new FieldLens[AnyRef](() => root, x => ???)
+          case OldRef => new FieldLens[AnyRef](() => oldRef, x => ???)
+          case NewRef => new FieldLens[AnyRef](() => newRef, x => ???)
+        },
+        (s, z) =>
+          s match {
+            case SelectIndex(index) =>
+              val ref = z.get().asInstanceOf[Array[AnyRef]]
+              new FieldLens[AnyRef](() => ref(index), x => { ref(index) = x })
+            case SelectField(name) =>
+              val ref = z.get()
+              // println(s"$ref $name")
+              val f = getAllClassFields(ref.getClass).find(_.getName == name).get
+              f.setAccessible(true)
+              new FieldLens[AnyRef](() => f.get(ref), x => f.set(ref, x))
+        }
+      )
+  }
+
+  def getFields(ref: AnyRef): List[(Select, FieldLens[AnyRef])] =
+    if (ref eq null) Nil
+    else
+      ref match {
+        case coll: Array[AnyRef] =>
+          coll.toList.zipWithIndex.map {
+            case (_, i) =>
+              SelectIndex(i) -> new FieldLens[AnyRef](() => coll(i), x => { coll(i) = x })
+          }
+
+        case _ =>
+          getAllClassFields(ref.getClass)
+            .filter(f => !f.getType.isPrimitive)
+            .map { f =>
+              f.setAccessible(true)
+              SelectField(f.getName) -> new FieldLens[AnyRef](() => f.get(ref), x => f.set(ref, x))
+            }
+      }
+
+  sealed abstract class Select
+  final case class SelectField(name: String) extends Select {
+    override def toString: String = "SelectField(\"" + name + "\")"
+  }
+  final case class SelectIndex(index: Int) extends Select
+
+  sealed abstract class Origin
+  final case object Root   extends Origin
+  final case object OldRef extends Origin
+  final case object NewRef extends Origin
+
+  final case class Path(origin: Origin, parts: List[Select]) {
+    def ::(select: Select): Path = Path(origin, select :: parts)
+    def fold[Z](o: Origin => Z, part: (Select, Z) => Z): Z =
+      parts.foldRight(o(origin))(part)
+  }
+
+  final class Wrapper(val value: AnyRef) {
+    override def equals(that: Any): Boolean =
+      if (!that.isInstanceOf[Wrapper]) false
+      else that.asInstanceOf[Wrapper].value eq this.value
+
+    override def hashCode(): Int =
+      System.identityHashCode(value)
+  }
+
+  def replaceAll(root: AnyRef, oldRef: AnyRef, newRef: AnyRef): List[Path] = {
+    val visited = mutable.HashMap.empty[Wrapper, Path]
+    val queue   = new java.util.ArrayDeque[(AnyRef, Path)]
+
+    val updated = mutable.ArrayBuffer.empty[Path]
+
+    def visit(value: AnyRef, path: Path): Unit =
+      if (!(value eq null)) {
+        val valueW = new Wrapper(value)
+        if (!visited.contains(valueW)) {
+          visited += (valueW -> path)
+          queue.addLast((value, path))
+        }
+      }
+
+    visit(root, Path(Root, Nil))
+    visit(oldRef, Path(OldRef, Nil))
+    visit(newRef, Path(NewRef, Nil))
+
+    while (queue.size() > 0) {
+      val (node, path) = queue.pop()
+
+      getFields(node).foreach {
+        case (action, field) =>
+          val value: AnyRef = field.get()
+          if (value eq oldRef) {
+            updated += action :: path
+            field.set(newRef)
+          }
+
+          visit(value, action :: path)
+      }
+    }
+
+    updated.toList
+  }
+}
 
 abstract class ResolutionFix {
   val global: Global
@@ -73,40 +191,36 @@ abstract class ResolutionFix {
       }
   }
 
-  def valSetter[T: ClassTag, U](name: String): (T, U) => Unit = {
-    val cls   = implicitly[ClassTag[T]].runtimeClass
-    val field = cls.getDeclaredField(name)
-    field.setAccessible(true)
-    (t, u) =>
-      field.set(t, u)
-  }
+  import FieldBuster._
 
-  def valGetter[T: ClassTag, U](name: String): T => U = {
-    val cls   = implicitly[ClassTag[T]].runtimeClass
-    val field = cls.getDeclaredField(name)
-    field.setAccessible(true)
-    t =>
-      field.get(t).asInstanceOf[U]
-  }
+  val commands = List(
+    Path(Root, List(SelectField("analyzer"))),
+    Path(Root, List(SelectField("analyzer"), SelectField("delambdafy$module"))),
+    Path(Root, List(SelectField("$outer"), SelectField("lastSeenContext"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("namerFactory$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("typerFactory$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("NoImplicitInfo"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("NoContext$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("Context$module"))),
+    Path(Root,
+         List(SelectField("$outer"),
+              SelectField("scala$tools$nsc$typechecker$Contexts$Context$$_reporter"),
+              SelectField("lastSeenContext"))),
+  ).reverse
 
-  def getGlobalPhasesSet =
-    valGetter[Global, mutable.HashSet[SubComponent]]("phasesSet")
-  def getGlobalPhasesDescMap =
-    valGetter[Global, mutable.Map[SubComponent, String]]("phasesDescMap")
-  def setGlobalAnalyzer =
-    valSetter[Global, Analyzer]("analyzer")
+  def init(): Unit =
+    try {
+      // Run this to update the command list.
+      // for (p <- FieldBuster.replaceAll(global, global.analyzer, newAnalyzer)) {
+      // println(s"$p,")
+      // }
 
-  def init(): Unit = {
-    val phases     = getGlobalPhasesSet(global)
-    val phaseDescs = getGlobalPhasesDescMap(global)
-
-    val oldTyper = phases.find(s => s.phaseName == "typer").get
-    val oldDesc  = phaseDescs(oldTyper)
-
-    phases.remove(oldTyper)
-    phaseDescs.remove(oldTyper)
-    setGlobalAnalyzer(global, newAnalyzer)
-    phases.add(newAnalyzer.typerFactory)
-    phaseDescs.put(newAnalyzer.typerFactory, oldDesc)
-  }
+      for (c <- commands) {
+        FieldLens.get(global, global.analyzer, newAnalyzer, c).set(newAnalyzer)
+      }
+    } catch {
+      case e: Throwable =>
+        e.printStackTrace()
+        throw e
+    }
 }
