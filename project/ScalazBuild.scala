@@ -38,6 +38,7 @@ object Scalaz {
 
   def stdSettings(prjName: String) = Seq(
     name := s"scalaz-$prjName",
+    licenses += ("LGPL-3.0", url("https://opensource.org/licenses/LGPL-3.0")),
     scalacOptions := stdOptions,
     scalacOptions in (Compile, compile) ++=
       Seq("-Ywarn-unused:imports", "-Xfatal-warnings"),

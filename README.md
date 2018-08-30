@@ -37,6 +37,13 @@ if (a === b) {
 }
 ```
 
+## Using
+
+```scala
+libraryDependencies += "org.scalaz" %% "scalaz-plugin-library" % "77dd9707"
+addCompilerPlugin("org.scalaz" % "scalaz-plugin" % "77dd9707" cross CrossVersion.full)
+```
+
 ---
 
 #### Other great compiler plugins you should check out
