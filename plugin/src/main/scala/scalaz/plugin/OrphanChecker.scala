@@ -1,4 +1,4 @@
-package scalaz.meta.plugin
+package scalaz.plugin
 
 import scala.tools.nsc.ast.TreeBrowsers
 import scala.tools.nsc.transform.{ Transform, TypingTransformers }

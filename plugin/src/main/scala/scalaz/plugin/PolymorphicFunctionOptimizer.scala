@@ -1,4 +1,4 @@
-package scalaz.meta.plugin
+package scalaz.plugin
 
 import java.io.{ PrintWriter, StringWriter }
 

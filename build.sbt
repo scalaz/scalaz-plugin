@@ -8,12 +8,13 @@ addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.fu
 scalacOptions ++= List("-Xplugin-require:macroparadise")
 
 lazy val meta = crossProject.module
-  .settings(stdSettings("meta"))
+  .settings(stdSettings("plugin-library"))
 lazy val metaJVM = meta.jvm
 lazy val metaJS  = meta.js
 
 lazy val plugin = (project in file("plugin"))
   .settings(
+    name := "scalaz-plugin",
     crossVersion := CrossVersion.full,
     libraryDependencies ++= List(
       scalaOrganization.value % "scala-reflect"  % scalaVersion.value % Provided,
