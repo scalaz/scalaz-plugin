@@ -1,4 +1,4 @@
 <plugin>
-    <name>newts</name>
-    <classname>scalaz.meta.plugin.MetaPlugin</classname>
+    <name>scalaz-plugin</name>
+    <classname>scalaz.plugin.MetaPlugin</classname>
 </plugin>

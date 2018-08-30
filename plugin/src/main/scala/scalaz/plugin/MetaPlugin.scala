@@ -1,11 +1,11 @@
-package scalaz.meta.plugin
+package scalaz.plugin
 
 import scala.tools.nsc._
 import scala.tools.nsc.plugins._
 
 class MetaPlugin(val global: Global) extends Plugin { plugin =>
-  val name        = "scalaz"
-  val description = "scalaz"
+  val name        = "scalaz-plugin"
+  val description = "scalaz-plugin"
 
   override def init(options: List[String], error: String => Unit): Boolean =
     true

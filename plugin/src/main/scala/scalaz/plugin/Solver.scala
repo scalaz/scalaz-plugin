@@ -1,4 +1,4 @@
-package scalaz.meta.plugin
+package scalaz.plugin
 
 class Solver[Literal] {
   type Clause  = List[Literal] // conjoined

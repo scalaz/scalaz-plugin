@@ -1,4 +1,4 @@
-package scalaz.meta.plugin
+package scalaz.plugin
 
 import scala.tools.nsc.Global
 
