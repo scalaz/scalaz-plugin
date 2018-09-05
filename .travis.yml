@@ -52,7 +52,7 @@ jobs:
     - &release
       stage: release
       name: "Release artifacts"
-      before_script: export PGP_SECRET="$(<./project/secret)"
+      before_script: export PGP_SECRET="$(<./project/zecret)"
       script: "sbt ci-release || sbt sonatypeReleaseAll"
 #    - &publishSite
 #      stage: publishMicrosite
