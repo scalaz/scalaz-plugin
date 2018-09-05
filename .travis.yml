@@ -66,6 +66,11 @@ jobs:
 #      - git config --global push.default simple
 #      - sbt ++${TRAVIS_SCALA_VERSION}! microsite/publishMicrosite
 
+    # Cross-build
+    - <<: *build
+      scala: 2.12.4
+      name: "Build with 2.12.4"
+
 cache:
   directories:
   - $HOME/.sbt/1.0/dependency
