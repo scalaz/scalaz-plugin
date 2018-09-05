@@ -2,7 +2,23 @@ import Scalaz._
 
 cancelable in Global := true
 
-organization in ThisBuild := "org.scalaz"
+inThisBuild(
+  List(
+    organization := "org.scalaz",
+    homepage := Some(url("https://github.com/scalaz/scalaz-plugin")),
+    licenses := List("LGPL 3.0" -> url("https://www.gnu.org/licenses/lgpl-3.0.en.html")),
+    developers := List(
+      Developer(
+        "alexknvl",
+        "Alexander Konovalov",
+        "alex.knvl@gmail.com",
+        url("https://alexknvl.com/")
+      )
+    )
+  )
+)
+
+addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 scalacOptions ++= List("-Xplugin-require:macroparadise")

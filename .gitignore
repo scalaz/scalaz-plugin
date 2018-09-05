@@ -1,3 +1,6 @@
+project/zecret
+project/secrets.tar.xz
+project/travis-deploy-key
 target
 .idea
 *.log
