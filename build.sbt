@@ -14,6 +14,12 @@ inThisBuild(
         "Alexander Konovalov",
         "alex.knvl@gmail.com",
         url("https://alexknvl.com/")
+      ),
+      Developer(
+        "hrhino",
+        "Harrison Houghton",
+        "28076058+hrhino@users.noreply.github.com",
+        url("https://github.com/hrhino/")
       )
     )
   )
