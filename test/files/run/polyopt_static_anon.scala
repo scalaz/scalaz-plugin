@@ -1,6 +1,8 @@
 import scalaz.plugin.test._
 
 object Test extends AsmpTest {
+  override def extraSettings: String = super.extraSettings ++ " -P:scalaz-plugin:+polyopt"
+
   override def code = """
   |class Foo[A]()
   |

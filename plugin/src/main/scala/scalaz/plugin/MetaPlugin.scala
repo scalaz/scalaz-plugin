@@ -7,8 +7,17 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
   val name        = "scalaz-plugin"
   val description = "scalaz-plugin"
 
+  val validOptions = Set(
+    "-resolution",
+    "-minimal",
+    "-orphans",
+    "+polyopt"
+  )
+
   override def init(options: List[String], error: String => Unit): Boolean =
-    true
+    options.map { o =>
+      if (!validOptions(o)) { error(s"Unknown option $o"); false } else true
+    }.forall(identity)
 
   val scalazDefns = new {
     val global: plugin.global.type = plugin.global
@@ -39,12 +48,13 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
   } with PolymorphicFunctionOptimizer
 
   val components: List[PluginComponent] = List(
-    "minimal" -> sufficiency,
-    "orphans" -> orphanChecker,
-    "polyopt" -> polymorphicFunctionOptimizer
+    "-minimal" -> sufficiency,
+    "-orphans" -> orphanChecker,
+    "+polyopt" -> polymorphicFunctionOptimizer
   ).flatMap {
-    case (opt, phf) =>
-      if (options.contains(s"-$opt")) None
-      else Some(phf)
+    case (opt, phf) if opt.startsWith("-") =>
+      if (options.contains(opt)) None else Some(phf)
+    case (opt, phf) if opt.startsWith("+") =>
+      if (options.contains(opt)) Some(phf) else None
   }
 }
