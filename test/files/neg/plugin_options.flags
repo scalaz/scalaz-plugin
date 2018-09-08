@@ -1,0 +1,6 @@
+-P:scalaz-plugin:-minimal
+-P:scalaz-plugin:-resolution
+-P:scalaz-plugin:-orphans
+-P:scalaz-plugin:+polyopt
+-P:scalaz-plugin:+randomstuff
+-P:scalaz-plugin:morerandomstuff
