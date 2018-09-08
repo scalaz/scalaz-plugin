@@ -39,12 +39,13 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
   } with PolymorphicFunctionOptimizer
 
   val components: List[PluginComponent] = List(
-    "minimal" -> sufficiency,
-    "orphans" -> orphanChecker,
-    "polyopt" -> polymorphicFunctionOptimizer
+    "-minimal" -> sufficiency,
+    "-orphans" -> orphanChecker,
+    "+polyopt" -> polymorphicFunctionOptimizer
   ).flatMap {
-    case (opt, phf) =>
-      if (options.contains(s"-$opt")) None
-      else Some(phf)
+    case (opt, phf) if opt.startsWith("-") =>
+      if (options.contains(opt)) None else Some(phf)
+    case (opt, phf) if opt.startsWith("+") =>
+      if (options.contains(opt)) Some(phf) else None
   }
 }

@@ -3,6 +3,7 @@ import scalaz.plugin.test._
 import java.io.{ BufferedReader, File, InputStreamReader }
 
 object Test extends AsmpTest {
+  override def extraSettings: String = super.extraSettings ++ " -P:scalaz-plugin:+polyopt"
 
   override def code = """
 
