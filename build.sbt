@@ -14,6 +14,12 @@ inThisBuild(
         "Alexander Konovalov",
         "alex.knvl@gmail.com",
         url("https://alexknvl.com/")
+      ),
+      Developer(
+        "hrhino",
+        "Harrison Houghton",
+        "self@haromorphism.net",
+        url("https://haromorphism.net/")
       )
     )
   )
