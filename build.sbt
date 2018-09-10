@@ -18,8 +18,8 @@ inThisBuild(
       Developer(
         "hrhino",
         "Harrison Houghton",
-        "28076058+hrhino@users.noreply.github.com",
-        url("https://github.com/hrhino/")
+        "self@haromorphism.net",
+        url("https://haromorphism.net/")
       )
     )
   )
