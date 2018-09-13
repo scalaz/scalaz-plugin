@@ -89,7 +89,7 @@ object FieldBuster {
     val visited = mutable.HashMap.empty[Wrapper, Path]
     val queue   = new java.util.ArrayDeque[(AnyRef, Path)]
 
-    val updated = mutable.ArrayBuffer.empty[Path]
+    val updated = List.newBuilder[Path]
 
     def visit(value: AnyRef, path: Path): Unit =
       if (!(value eq null)) {
@@ -119,7 +119,7 @@ object FieldBuster {
       }
     }
 
-    updated.toList
+    updated.result()
   }
 }
 

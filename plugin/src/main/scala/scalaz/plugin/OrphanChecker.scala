@@ -36,7 +36,7 @@ abstract class OrphanChecker
               RefinedType(sym.asClass.info.parents.filterNot(_ =:= AnyRefTpe), EmptyScope)
             )
           case RefinedType(parents, decls) =>
-            parents.flatMap(t => nonOrphanLocations(t))
+            parents.flatMap(nonOrphanLocations)
           case TypeRef(pre, sym, args) =>
             val companions =
               dealiased.typeConstructor.typeSymbol ::
@@ -52,9 +52,9 @@ abstract class OrphanChecker
       }
 
     def propositionTree(tree: Tree): Boolean = tree match {
-      case tree @ Select(_, _) if tree.tpe <:< TypeclassClass.tpe             => true
-      case Apply(fun, args) if args.forall(a => a.tpe <:< TypeclassClass.tpe) => true
-      case _                                                                  => false
+      case tree @ Select(_, _) if tree.tpe <:< TypeclassClass.tpe        => true
+      case Apply(fun, args) if args.forall(_.tpe <:< TypeclassClass.tpe) => true
+      case _                                                             => false
     }
 
     object SimpleTypeclassType {
