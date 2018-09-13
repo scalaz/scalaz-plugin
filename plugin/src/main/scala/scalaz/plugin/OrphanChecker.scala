@@ -36,7 +36,7 @@ abstract class OrphanChecker
               RefinedType(sym.asClass.info.parents.filterNot(_ =:= AnyRefTpe), EmptyScope)
             )
           case RefinedType(parents, decls) =>
-            parents.flatMap(t => nonOrphanLocations(t))
+            parents.flatMap(nonOrphanLocations)
           case TypeRef(pre, sym, args) =>
             val companions =
               dealiased.typeConstructor.typeSymbol ::
