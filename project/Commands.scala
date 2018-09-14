@@ -65,4 +65,26 @@ object Commandz {
     }
   }
 
+  /** A command to launch the repl with given args and the plugin enabled.
+    */
+  val replCommand: Command =
+    Command.args("repl", "<scalac args>") { (state, args) =>
+      import Keys.{state => _, _}
+      val extracted = Project.extract(state)
+      val (state1, cp) =
+        extracted.runTask(fullClasspath in Compile in LocalProject("plugin"), state)
+      val (state2, pluginJar) =
+        extracted.runTask(packageBin in Compile in LocalProject("plugin"), state1)
+      // for some reason we need to add the classpath here... passing it to the
+      // `runner` below lets us load scalac but nothing else (even with -usejavacp)
+      val scalacOpts =
+        "-cp" :: cp.map(_.data).mkString(":") :: s"-Xplugin:$pluginJar" :: args.toList
+
+      val log = extracted.get(sLog) // wrong logger, but works
+      val (state3, runner) = extracted.runTask(Keys.runner in LocalProject("plugin"), state2)
+      runner.run("scala.tools.nsc.MainGenericRunner", cp.map(_.data), scalacOpts, log)
+        .get
+
+      state3
+    }
 }
