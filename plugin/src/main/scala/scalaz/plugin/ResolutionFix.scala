@@ -1,12 +1,12 @@
 package scalaz.plugin
 
-import java.lang.reflect.{Field, Modifier}
+import java.lang.reflect.{ Field, Modifier }
 
 import scala.collection.mutable
 import scala.tools.nsc.Global
 import scala.tools.nsc.interactive.InteractiveAnalyzer
-import scala.tools.nsc.typechecker.{Analyzer, AnalyzerPlugins, Contexts, Macros}
-import scala.tools.nsc.interactive.{Global => InteractiveGlobal}
+import scala.tools.nsc.typechecker.{ Analyzer, AnalyzerPlugins, Contexts, Macros }
+import scala.tools.nsc.interactive.{ Global => InteractiveGlobal }
 
 object FieldBuster {
   def getSuperclasses[T](cls: Class[T]): List[Class[_]] = {
@@ -157,14 +157,14 @@ abstract class ResolutionFix {
         }
 
     override def inferImplicit(
-                                tree: Tree,
-                                pt: Type,
-                                reportAmbiguous: Boolean,
-                                isView: Boolean,
-                                context: Context,
-                                saveAmbiguousDivergent: Boolean,
-                                pos: Position
-                              ): SearchResult =
+      tree: Tree,
+      pt: Type,
+      reportAmbiguous: Boolean,
+      isView: Boolean,
+      context: Context,
+      saveAmbiguousDivergent: Boolean,
+      pos: Position
+    ): SearchResult =
       if (pt <:< TypeclassClass.tpe) {
         // Note that the isInvalidConversionTarget seems to make a lot more sense right here, before all the
         // work is performed, than at the point where it presently exists.
@@ -196,14 +196,14 @@ abstract class ResolutionFix {
   final class NewInteractiveAnalyzer extends {
     val global: InteractiveGlobal = ResolutionFix.this.global.asInstanceOf[InteractiveGlobal]
   } with InteractiveAnalyzer with AnalyzerMixin {
-    var oldClassLoader: () => ClassLoader = _
+    var oldClassLoader: () => ClassLoader            = _
     override def findMacroClassLoader(): ClassLoader = oldClassLoader()
   }
 
   final class NewAnalyzer extends {
     val global: ResolutionFix.this.global.type = ResolutionFix.this.global
   } with AnalyzerMixin {
-    var oldClassLoader: () => ClassLoader = _
+    var oldClassLoader: () => ClassLoader            = _
     override def findMacroClassLoader(): ClassLoader = oldClassLoader()
   }
 
@@ -225,14 +225,17 @@ abstract class ResolutionFix {
   ).reverse
 
   val interactiveCommands = List(
-    Path(Root,List(SelectField("analyzer"))),
-    Path(Root,List(SelectField("analyzer"), SelectField("delambdafy$module"))),
-    Path(OldRef,List(SelectField("$outer"), SelectField("namerFactory$module"))),
-    Path(OldRef,List(SelectField("$outer"), SelectField("typerFactory$module"))),
-    Path(OldRef,List(SelectField("$outer"), SelectField("NoImplicitInfo"))),
-    Path(OldRef,List(SelectField("$outer"), SelectField("NoContext$module"))),
-    Path(OldRef,List(SelectField("$outer"), SelectField("Context$module"))),
-    Path(OldRef,List(SelectField("$outer"), SelectField("scala$tools$nsc$typechecker$Contexts$Context$$_reporter"), SelectField("NoContext$module"))),
+    Path(Root, List(SelectField("analyzer"))),
+    Path(Root, List(SelectField("analyzer"), SelectField("delambdafy$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("namerFactory$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("typerFactory$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("NoImplicitInfo"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("NoContext$module"))),
+    Path(OldRef, List(SelectField("$outer"), SelectField("Context$module"))),
+    Path(OldRef,
+         List(SelectField("$outer"),
+              SelectField("scala$tools$nsc$typechecker$Contexts$Context$$_reporter"),
+              SelectField("NoContext$module"))),
   ).reverse
 
   def getMacroClassLoader(analyzer: Analyzer): ClassLoader = {
@@ -261,7 +264,7 @@ abstract class ResolutionFix {
       val oldAnalyzer: Analyzer = global.analyzer
 
       oldAnalyzer match {
-        case _: NewAnalyzer => ()
+        case _: NewAnalyzer            => ()
         case _: NewInteractiveAnalyzer => ()
 
         case i: InteractiveAnalyzer =>
