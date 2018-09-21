@@ -1,10 +1,12 @@
 package scalaz.plugin
 
-import java.lang.reflect.{ Field, Modifier }
+import java.lang.reflect.{Field, Modifier}
 
 import scala.collection.mutable
 import scala.tools.nsc.Global
-import scala.tools.nsc.typechecker.Analyzer
+import scala.tools.nsc.interactive.InteractiveAnalyzer
+import scala.tools.nsc.typechecker.{Analyzer, AnalyzerPlugins, Contexts, Macros}
+import scala.tools.nsc.interactive.{Global => InteractiveGlobal}
 
 object FieldBuster {
   def getSuperclasses[T](cls: Class[T]): List[Class[_]] = {
@@ -129,11 +131,11 @@ abstract class ResolutionFix {
 
   import global._
 
-  val newAnalyzer = new NewAnalyzer()
+  trait AnalyzerMixin extends Analyzer {
+    import global._
 
-  final class NewAnalyzer extends {
-    val global: ResolutionFix.this.global.type = ResolutionFix.this.global
-  } with Analyzer {
+    lazy val TypeclassClass: ClassSymbol = rootMirror.getRequiredClass("scalaz.meta.Typeclass")
+
     def selectScore(tree: Tree): Option[Int] = tree match {
       case TypeApply(fun, args) => selectScore(fun)
       case Select(qualifier, _) => selectScore(qualifier).map(_ + 1)
@@ -155,15 +157,15 @@ abstract class ResolutionFix {
         }
 
     override def inferImplicit(
-      tree: Tree,
-      pt: Type,
-      reportAmbiguous: Boolean,
-      isView: Boolean,
-      context: Context,
-      saveAmbiguousDivergent: Boolean,
-      pos: Position
-    ): SearchResult =
-      if (pt <:< scalazDefns.TypeclassClass.tpe) {
+                                tree: Tree,
+                                pt: Type,
+                                reportAmbiguous: Boolean,
+                                isView: Boolean,
+                                context: Context,
+                                saveAmbiguousDivergent: Boolean,
+                                pos: Position
+                              ): SearchResult =
+      if (pt <:< TypeclassClass.tpe) {
         // Note that the isInvalidConversionTarget seems to make a lot more sense right here, before all the
         // work is performed, than at the point where it presently exists.
         val shouldPrint = printTypings && context.undetparams.nonEmpty
@@ -191,9 +193,23 @@ abstract class ResolutionFix {
       }
   }
 
+  final class NewInteractiveAnalyzer extends {
+    val global: InteractiveGlobal = ResolutionFix.this.global.asInstanceOf[InteractiveGlobal]
+  } with InteractiveAnalyzer with AnalyzerMixin {
+    var oldClassLoader: () => ClassLoader = _
+    override def findMacroClassLoader(): ClassLoader = oldClassLoader()
+  }
+
+  final class NewAnalyzer extends {
+    val global: ResolutionFix.this.global.type = ResolutionFix.this.global
+  } with AnalyzerMixin {
+    var oldClassLoader: () => ClassLoader = _
+    override def findMacroClassLoader(): ClassLoader = oldClassLoader()
+  }
+
   import FieldBuster._
 
-  val commands = List(
+  val nonInteractiveCommands = List(
     Path(Root, List(SelectField("analyzer"))),
     Path(Root, List(SelectField("analyzer"), SelectField("delambdafy$module"))),
     Path(Root, List(SelectField("$outer"), SelectField("lastSeenContext"))),
@@ -208,15 +224,64 @@ abstract class ResolutionFix {
               SelectField("lastSeenContext"))),
   ).reverse
 
+  val interactiveCommands = List(
+    Path(Root,List(SelectField("analyzer"))),
+    Path(Root,List(SelectField("analyzer"), SelectField("delambdafy$module"))),
+    Path(OldRef,List(SelectField("$outer"), SelectField("namerFactory$module"))),
+    Path(OldRef,List(SelectField("$outer"), SelectField("typerFactory$module"))),
+    Path(OldRef,List(SelectField("$outer"), SelectField("NoImplicitInfo"))),
+    Path(OldRef,List(SelectField("$outer"), SelectField("NoContext$module"))),
+    Path(OldRef,List(SelectField("$outer"), SelectField("Context$module"))),
+    Path(OldRef,List(SelectField("$outer"), SelectField("scala$tools$nsc$typechecker$Contexts$Context$$_reporter"), SelectField("NoContext$module"))),
+  ).reverse
+
+  def getMacroClassLoader(analyzer: Analyzer): ClassLoader = {
+    val method = analyzer.getClass.getMethod("findMacroClassLoader")
+    method.setAccessible(true)
+    method.invoke(analyzer).asInstanceOf[ClassLoader]
+  }
+
+  def copyState(old: Analyzer, neu: Analyzer): Unit = {
+    import FieldBuster.getAllClassFields
+
+    def copyField(old: AnyRef, neu: AnyRef, name: String): Unit = {
+      val oldField = getAllClassFields(old.getClass).find(_.getName.endsWith(name)).get
+      oldField.setAccessible(true)
+      val field = getAllClassFields(neu.getClass).find(_.getName.endsWith(name)).get
+      field.setAccessible(true)
+      field.set(neu, oldField.get(old))
+    }
+
+    copyField(old, neu, "macroPlugins")
+    copyField(old, neu, "analyzerPlugins")
+  }
+
   def init(): Unit =
     try {
-      // Run this to update the command list.
-      // for (p <- FieldBuster.replaceAll(global, global.analyzer, newAnalyzer)) {
-      // println(s"$p,")
-      // }
+      val oldAnalyzer: Analyzer = global.analyzer
 
-      for (c <- commands) {
-        FieldLens.get(global, global.analyzer, newAnalyzer, c).set(newAnalyzer)
+      oldAnalyzer match {
+        case _: NewAnalyzer => ()
+        case _: NewInteractiveAnalyzer => ()
+
+        case i: InteractiveAnalyzer =>
+//          for (p <- FieldBuster.replaceAll(global, global.analyzer, new NewInteractiveAnalyzer)) {
+//            println(s"$p,")
+//          }
+          val newAnalyzer = new NewInteractiveAnalyzer()
+          for (c <- interactiveCommands) {
+            FieldLens.get(global, oldAnalyzer, newAnalyzer, c).set(newAnalyzer)
+          }
+          copyState(oldAnalyzer, newAnalyzer)
+          newAnalyzer.oldClassLoader = () => getMacroClassLoader(oldAnalyzer)
+
+        case ni: Analyzer =>
+          val newAnalyzer = new NewAnalyzer()
+          for (c <- nonInteractiveCommands) {
+            FieldLens.get(global, oldAnalyzer, newAnalyzer, c).set(newAnalyzer)
+          }
+          copyState(oldAnalyzer, newAnalyzer)
+          newAnalyzer.oldClassLoader = () => getMacroClassLoader(oldAnalyzer)
       }
     } catch {
       case e: Throwable =>
