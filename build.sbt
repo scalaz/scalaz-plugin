@@ -69,7 +69,10 @@ lazy val tests = (project in file("test"))
     )
   )
 
-commands in Global += Commandz.partestCommand(baseDirectory.value)
+commands in Global ++= List(
+  Commandz.partestCommand(baseDirectory.value),
+  Commandz.replCommand,
+)
 
 lazy val exampleJVM = example.jvm
 lazy val exampleJS  = example.js
