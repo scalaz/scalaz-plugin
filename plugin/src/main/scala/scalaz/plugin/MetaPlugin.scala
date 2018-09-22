@@ -11,7 +11,8 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     "-resolution",
     "-minimal",
     "-orphans",
-    "+polyopt"
+    "+polyopt",
+    "+mixins"
   )
 
   override def init(options: List[String], error: String => Unit): Boolean =
@@ -42,6 +43,11 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
   } with OrphanChecker
 
+  object mixins extends {
+    val global: plugin.global.type                                  = plugin.global
+    val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
+  } with Mixins
+
   object polymorphicFunctionOptimizer extends {
     val global: plugin.global.type                                  = plugin.global
     val scalazDefns: Definitions { val global: plugin.global.type } = plugin.scalazDefns
@@ -50,7 +56,8 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
   val components: List[PluginComponent] = List(
     "-minimal" -> sufficiency,
     "-orphans" -> orphanChecker,
-    "+polyopt" -> polymorphicFunctionOptimizer
+    "+polyopt" -> polymorphicFunctionOptimizer,
+    "+mixins" -> mixins
   ).flatMap {
     case (opt, phf) if opt.startsWith("-") =>
       if (options.contains(opt)) None else Some(phf)

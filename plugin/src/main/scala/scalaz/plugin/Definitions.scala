@@ -20,9 +20,11 @@ abstract class Definitions {
   lazy val ScalazMetaPackage = ensurePackage(ScalazPackage.moduleClass, "meta")
 
   // TODO
+  lazy val MixinAttr: ClassSymbol      = rootMirror.getRequiredClass("scalaz.meta.mixin")
   lazy val TypeclassClass: ClassSymbol = rootMirror.getRequiredClass("scalaz.meta.Typeclass")
   lazy val TypeclassType: Type         = TypeclassClass.tpe
   lazy val OrphanAttr: ClassSymbol     = rootMirror.getRequiredClass("scalaz.meta.orphan")
+  lazy val InstancesAttr: ClassSymbol  = rootMirror.getRequiredClass("scalaz.meta.instances")
   lazy val EnableOrphansFlag: ClassSymbol =
     rootMirror.getRequiredClass("scalaz.meta.features.orphans")
 
