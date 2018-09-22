@@ -5,7 +5,7 @@ trait Semigroup[A] extends Typeclass {
 }
 
 trait Monoid[A] extends Semigroup[A] {
-//  def mempty: A
+  def mempty: A
 }
 
 trait CommutativeMonoid[A] extends Monoid[A]
@@ -18,9 +18,9 @@ case class Identity[A](a: A)
   }
 
   implicit def monoid[A](implicit A: Monoid[A]): Monoid[Identity[A]] = new Monoid[Identity[A]] {
-//    def mempty: Identity[A] = Identity[A](A.mempty)
+    def mempty: Identity[A] = Identity[A](A.mempty)
   }
 
-  implicit def commutativeMonoid[A](implicit A: Monoid[A]): Monoid[Identity[A]] =
+  implicit def commutativeMonoid[A](implicit A: CommutativeMonoid[A]): CommutativeMonoid[Identity[A]] =
     new CommutativeMonoid[Identity[A]] {}
 }

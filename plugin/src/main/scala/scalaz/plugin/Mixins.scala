@@ -25,18 +25,20 @@ abstract class Mixins
     type TyParamSubstMap = Map[String, global.Type]
     type ValueParamSubstMap = Map[String, global.Symbol]
 
-    case class StatePart(body: List[global.Tree], tyParamSyms: TyParamSubstMap, valueParamSyms: ValueParamSubstMap) {
-      def substitute(newTyParamSyms: TyParamSubstMap, newValueParamSyms: ValueParamSubstMap): List[global.Tree] = {
+    case class StatePart(body: List[global.Tree], tyParamSyms: TyParamSubstMap, valueParamSyms: ValueParamSubstMap, oldAnonClass: global.Symbol) {
+      def substitute(newTyParamSyms: TyParamSubstMap, newValueParamSyms: ValueParamSubstMap, newAnonClass: global.Symbol): List[global.Tree] = {
         val (oldTys, newTys) = tyParamSyms.map { case (k, v) =>
-          newTyParamSyms.get(k).map(ns => (v.typeSymbol, ns))
+          newTyParamSyms.get(k).map(ns => (v.typeSymbol.newTypeSkolem, ns.typeSymbol.newTypeSkolem))
         }.toList.flatten.unzip
         val (oldVs, newVs) = valueParamSyms.map { case (k, v) =>
           newValueParamSyms.get(k).map(ns => (v, ns))
         }.toList.flatten.unzip
-        body.map(
-          _.substituteTypes(oldTys, newTys)
-           .substituteSymbols(oldVs, newVs)
-        )
+        body.map { b =>
+          val bd = b.duplicate
+          bd
+            .substituteSymbols(oldVs ++ oldTys ++ List(oldAnonClass, b.symbol), newVs ++ newTys ++ List(newAnonClass, bd.symbol))
+            .changeOwner(oldAnonClass -> newAnonClass) // b.symbol -> bd.symbol)
+        }
       }
     }
 
@@ -98,19 +100,23 @@ abstract class Mixins
         () <- if (state.contains(instanceTy.typeSymbol.name.toString)) {
           None
         } else {
-          state += (instanceTy.typeSymbol.name.toString -> StatePart(removeInit(anonClass.impl.body), tySubstMap, valSubstMap))
+          state += (instanceTy.typeSymbol.name.toString -> StatePart(removeInit(anonClass.impl.body), tySubstMap, valSubstMap, anonClass.symbol))
           Some(())
         }
         extraCode = listTraverseOption(scs)(t => state.get(t.typeSymbol.name.toString)).map {
-          _.flatMap(_.substitute(tySubstMap, valSubstMap))
+          _.flatMap(_.substitute(tySubstMap, valSubstMap, anonClass.symbol))
         }
         newTree = extraCode match {
           case Some(code) if code.nonEmpty =>
-            defdef.copy(rhs = global.Block(
-              List(
-                anonClass.copy(impl = anonClass.impl.copy(body = anonClass.impl.body ++ code))
-              ), newInstance
-            )).duplicate.setSymbol(global.NoSymbol)
+            global.deriveDefDef(defdef)(_ =>
+              global.Block(
+                List(
+                  global.deriveClassDef(
+                    anonClass
+                  )(_.copy(body = anonClass.impl.body ++ code))
+                ), newInstance
+              ).duplicate
+            )
           case _ =>
             tr
         }
