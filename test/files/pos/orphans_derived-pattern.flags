@@ -1,0 +1,3 @@
+-Ycheck:all
+-Ydebug
+-P:scalaz-plugin:+polyopt
