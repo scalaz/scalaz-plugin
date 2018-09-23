@@ -78,7 +78,7 @@ abstract class OrphanChecker
       case _                                                             => false
     }
 
-    def validateClassDeclaration(pos: Position, sym: Symbol, parents: List[Tree]): Unit =
+    def validateInstanceDeclaration(pos: Position, sym: Symbol, parents: List[Tree]): Unit =
       parents
         .map(_.tpe)
         .flatMap(
@@ -151,11 +151,11 @@ abstract class OrphanChecker
       case cd @ ClassDef(mods, _, _, Template(parents, _, _)) if cd.symbol.tpe <:< TypeclassType =>
         val sym = cd.symbol
         if (sym.isClass && !sym.isAbstract) {
-          validateClassDeclaration(cd.pos, sym, parents)
+          validateInstanceDeclaration(cd.pos, sym, parents)
         }
 
       case md @ ModuleDef(_, _, Template(parents, _, _)) if md.symbol.tpe <:< TypeclassType =>
-        validateClassDeclaration(md.pos, md.symbol, parents)
+        validateInstanceDeclaration(md.pos, md.symbol, parents)
 
       case _ => ()
     }
