@@ -25,14 +25,13 @@ object `package` {
 
   implicit class ToExtraListOps[A](list: List[A]) {
     def toNel: Option[NonEmptyList[A]] = list match {
-      case Nil => None
+      case Nil     => None
       case x :: xs => Some(NonEmptyList(x, xs))
     }
   }
 
   implicit class ToExtraListEitherOps[E, A](list: List[Either[E, A]]) {
     def separate: (List[E], List[A]) =
-      (list.flatMap(_.left.toOption),
-        list.flatMap(_.right.toOption))
+      (list.flatMap(_.left.toOption), list.flatMap(_.right.toOption))
   }
 }

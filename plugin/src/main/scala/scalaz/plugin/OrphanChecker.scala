@@ -4,8 +4,8 @@ import miniz._
 
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.ast.TreeBrowsers
-import scala.tools.nsc.transform.{Transform, TypingTransformers}
-import scala.tools.nsc.{Global, plugins}
+import scala.tools.nsc.transform.{ Transform, TypingTransformers }
+import scala.tools.nsc.{ plugins, Global }
 import scala.util.control.NonFatal
 
 abstract class OrphanChecker
@@ -25,7 +25,9 @@ abstract class OrphanChecker
   def newTransformer(unit: CompilationUnit): Transformer =
     new MyTransformer(unit)
 
-  final case class SimpleTypeclassType(constructor: Type, args: List[Type], orphanAnnotation: Boolean)
+  final case class SimpleTypeclassType(constructor: Type,
+                                       args: List[Type],
+                                       orphanAnnotation: Boolean)
   object SimpleTypeclassType {
     def check(tpe: Type): Option[SimpleTypeclassType] = {
       val dealiased = tpe.dealias
@@ -76,24 +78,29 @@ abstract class OrphanChecker
       case _                                                             => false
     }
 
-    def validateClassDeclaration(pos: Position, sym: Symbol, parents: List[Tree]): Unit = {
-      parents.map(_.tpe).flatMap(t =>
-        SimpleTypeclassType.check(t) match {
-          case Some(typeclassType) => List(Right(typeclassType))
-          case None =>
-            if (t =:= AnyRefTpe) Nil
-            else List(Left(t))
-        }
-      ).separate match {
+    def validateClassDeclaration(pos: Position, sym: Symbol, parents: List[Tree]): Unit =
+      parents
+        .map(_.tpe)
+        .flatMap(
+          t =>
+            SimpleTypeclassType.check(t) match {
+              case Some(typeclassType) => List(Right(typeclassType))
+              case None =>
+                if (t =:= AnyRefTpe) Nil
+                else List(Left(t))
+          }
+        )
+        .separate match {
         case Nil /\ Nil =>
-          globalError(pos,
+          globalError(
+            pos,
             "Internal error: typeclass instance declaration has no parents.\n" +
-            "This should be impossible. Please file an issue at https://github.com/scalaz/scalaz-plugin/issues")
+              "This should be impossible. Please file an issue at https://github.com/scalaz/scalaz-plugin/issues"
+          )
 
         case (l @ _ :: _) /\ _ =>
-          globalError(pos,
-            s"""Typeclass instance declaration has some unrecognized parents:
-               |${l.mkString(", ")}
+          globalError(pos, s"""Typeclass instance declaration has some unrecognized parents:
+                              |${l.mkString(", ")}
              """.stripMargin)
 
         case Nil /\ typeclassParents =>
@@ -121,7 +128,6 @@ abstract class OrphanChecker
             }
           }
       }
-    }
 
     def checkTreeNodeForOrphans(tree: Tree): Unit = tree match {
       case Apply(fun, args) =>
