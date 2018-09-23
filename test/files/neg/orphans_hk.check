@@ -1,7 +1,7 @@
-orphan_hk.scala:20: error: Orphan instance.
+orphans_hk.scala:20: error: Orphan instance.
   implicit val foo1: Foo[Bar] = new Foo[Bar] {} // bad
                                     ^
-orphan_hk.scala:24: error: Orphan instance.
+orphans_hk.scala:24: error: Orphan instance.
     implicit val foo2: Foo[Bar] = new Foo[Bar] {} // bad
                                       ^
 two errors found
