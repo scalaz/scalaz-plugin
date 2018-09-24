@@ -1,4 +1,0 @@
-deferred.scala:5: error: methods making up a minimal definition must not be abstract
-  def deferred: Int
-      ^
-one error found

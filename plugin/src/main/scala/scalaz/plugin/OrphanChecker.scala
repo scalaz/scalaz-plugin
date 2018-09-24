@@ -1,5 +1,8 @@
 package scalaz.plugin
 
+import miniz._
+
+import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.ast.TreeBrowsers
 import scala.tools.nsc.transform.{ Transform, TypingTransformers }
 import scala.tools.nsc.{ plugins, Global }
@@ -21,6 +24,24 @@ abstract class OrphanChecker
 
   def newTransformer(unit: CompilationUnit): Transformer =
     new MyTransformer(unit)
+
+  final case class SimpleTypeclassType(constructor: Type,
+                                       args: List[Type],
+                                       orphanAnnotation: Boolean)
+  object SimpleTypeclassType {
+    def check(tpe: Type): Option[SimpleTypeclassType] = {
+      val dealiased = tpe.dealias
+      dealiased match {
+        case TypeRef(pre, sym, args) if dealiased <:< TypeclassClass.tpe =>
+          Some(SimpleTypeclassType(dealiased.typeConstructor, args, false))
+        case AnnotatedType(annotations, underlying) =>
+          SimpleTypeclassType.check(underlying).map {
+            _.copy(orphanAnnotation = annotations.exists(a => a.matches(OrphanAttr)))
+          }
+        case _ => None
+      }
+    }
+  }
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
     // FIXME: We don't really transform the tree, merely traverse.
@@ -57,86 +78,58 @@ abstract class OrphanChecker
       case _                                                             => false
     }
 
-    object SimpleTypeclassType {
-      def unapply(tpe: Type): Option[(Type, List[Type], Boolean)] = {
-        val dealiased = tpe.dealias
-        dealiased match {
-          case TypeRef(pre, sym, args) if dealiased <:< TypeclassClass.tpe =>
-            Some((dealiased.typeConstructor, args, false))
-          case AnnotatedType(annotations, underlying) =>
-            SimpleTypeclassType.unapply(underlying).map {
-              _.copy(_3 = annotations.exists(a => a.matches(OrphanAttr)))
+    def validateInstanceDeclaration(pos: Position, sym: Symbol, parents: List[Tree]): Unit =
+      parents
+        .map(_.tpe)
+        .flatMap(
+          t =>
+            SimpleTypeclassType.check(t) match {
+              case Some(typeclassType) => List(Right(typeclassType))
+              case None =>
+                if (t =:= AnyRefTpe) Nil
+                else List(Left(t))
+          }
+        )
+        .separate match {
+        case Nil /\ Nil =>
+          globalError(
+            pos,
+            "Internal error: typeclass instance declaration has no parents.\n" +
+              "This should be impossible. Please file an issue at https://github.com/scalaz/scalaz-plugin/issues"
+          )
+
+        case (l @ _ :: _) /\ _ =>
+          globalError(pos, s"""Typeclass instance declaration has some unrecognized parents:
+                              |${l.mkString(", ")}
+             """.stripMargin)
+
+        case Nil /\ typeclassParents =>
+          val enclosing: Set[Symbol] = Set(currentOwner.ownerChain: _*)
+
+          val symbolSets = typeclassParents.flatMap {
+            case SimpleTypeclassType(tc, args, orphan) =>
+              val ss = tc.typeConstructor.typeSymbol :: args.map(_.typeSymbol)
+              if (orphan) None else Some(Set(ss: _*))
+          }
+
+          if (symbolSets.nonEmpty) {
+            val locations = symbolSets
+              .reduce[Set[Symbol]] { case (a, b) => a.intersect(b) }
+              .flatMap(s => s :: s.companionModule.moduleClass :: s.companionModule :: Nil)
+              .filter(s => s != NoSymbol)
+
+            if (locations.intersect(enclosing).isEmpty) {
+              val orphansAllowed =
+                analyzer.inferImplicitByType(EnableOrphansFlag.tpe, localTyper.context)
+
+              if (orphansAllowed.isFailure) {
+                globalError(pos, "Orphan instance.")
+              }
             }
-          case _ => None
-        }
-      }
-    }
-
-    def isExplicitOrphanNew(tree: Tree): Boolean = {
-      val treeAnnotation = tree.tpe.hasAnnotation(OrphanAttr)
-      val ownerAnnotation = if (currentOwner.isTerm) {
-        currentOwner.asTerm.hasAnnotation(OrphanAttr)
-      } else false
-
-      inform(tree.pos, s"""isExplicitOrphanNew
-                          | $treeAnnotation
-                          | $ownerAnnotation
-         """.stripMargin)
-      treeAnnotation || ownerAnnotation
-    }
-
-    def validClassDelc(pos: Position, sym: Symbol, parents: List[Tree]): Unit = {
-      // first base class is `sym`
-      val baseClasses = sym.baseClasses.tail.filter { c =>
-        c != definitions.ObjectClass &&
-        c != definitions.AnyRefClass &&
-        c != definitions.AnyClass &&
-        c != definitions.AnyValClass &&
-        c != definitions.SerializableClass &&
-        c != TypeclassClass
+          }
       }
 
-      if (!baseClasses.forall(_.tpe <:< TypeclassType)) {
-        error.InvalidTypeclassInstanceDeclaration(pos)
-        return
-      }
-
-      val enclosing: Set[Symbol] =
-        Set(currentOwner.ownerChain: _*)
-
-      val ps = parents.map(_.tpe).collect {
-        case SimpleTypeclassType(pair) => pair
-      }
-
-      if (ps.isEmpty) {
-        error.InvalidTypeclassInstanceDeclaration(pos)
-        return
-      }
-
-      val symbolSets = ps.flatMap {
-        case (tc, args, orphan) =>
-          val ss = tc.typeConstructor.typeSymbol :: args.map(_.typeSymbol)
-          if (orphan) None
-          else Some(Set(ss: _*))
-      }
-
-      if (symbolSets.nonEmpty) {
-        val locations = symbolSets
-          .reduce[Set[Symbol]] { case (a, b) => a.intersect(b) }
-          .flatMap(s => s :: s.companionModule.moduleClass :: s.companionModule :: Nil)
-          .filter(s => s != NoSymbol)
-
-        if (locations.intersect(enclosing).isEmpty) {
-          val orphansAllowed =
-            analyzer.inferImplicitByType(EnableOrphansFlag.tpe, localTyper.context)
-
-          if (orphansAllowed.isFailure)
-            globalError(pos, "Orphan instance.")
-        }
-      }
-    }
-
-    def check(tree: Tree): Unit = tree match {
+    def checkTreeNodeForOrphans(tree: Tree): Unit = tree match {
       case Apply(fun, args) =>
         val tpe = tree.tpe.dealias
 
@@ -158,18 +151,18 @@ abstract class OrphanChecker
       case cd @ ClassDef(mods, _, _, Template(parents, _, _)) if cd.symbol.tpe <:< TypeclassType =>
         val sym = cd.symbol
         if (sym.isClass && !sym.isAbstract) {
-          validClassDelc(cd.pos, sym, parents)
+          validateInstanceDeclaration(cd.pos, sym, parents)
         }
 
       case md @ ModuleDef(_, _, Template(parents, _, _)) if md.symbol.tpe <:< TypeclassType =>
-        validClassDelc(md.pos, md.symbol, parents)
+        validateInstanceDeclaration(md.pos, md.symbol, parents)
 
       case _ => ()
     }
 
     override def transform(tree: Tree): Tree = {
       try {
-        check(tree)
+        checkTreeNodeForOrphans(tree)
       } catch {
         case NonFatal(e) =>
           e.printStackTrace(System.err)
@@ -177,11 +170,5 @@ abstract class OrphanChecker
       }
       super.transform(tree)
     }
-  }
-
-  object error {
-
-    def InvalidTypeclassInstanceDeclaration(pos: Position): Unit =
-      globalError(pos, "Invalid typeclass instance declaration.")
   }
 }
