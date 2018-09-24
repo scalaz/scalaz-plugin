@@ -145,8 +145,6 @@ abstract class Mixins
   override val runsAfter: List[String] = "namer" :: Nil
   override val runsBefore: List[String] = Nil
 
-  import definitions.AnyRefTpe
-
   override def newPhase(prev: scala.tools.nsc.Phase): StdPhase = new StdPhase(prev) {
     def apply(unit: global.CompilationUnit): Unit = ()
   }
