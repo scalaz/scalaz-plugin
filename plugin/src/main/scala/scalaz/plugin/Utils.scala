@@ -83,11 +83,10 @@ trait Utils {
       m.typeParams.nonEmpty && m.paramLists.isEmpty
     } else false
 
-  /**
-   *
-   * @param tmpl
-   * @return
-   */
   def collectParameterlessPolymorphicMethods(tmpl: Template): List[MethodSymbol] =
     tmpl.body.map(_.symbol).filter(isParameterlessPolymorphicMethod).map(_.asMethod)
+
+  implicit final class Ops[A](val self: A) {
+    def opt[B](f: PartialFunction[A, B]): Option[B] = f.lift(self)
+  }
 }

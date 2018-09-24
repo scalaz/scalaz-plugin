@@ -8,13 +8,10 @@ import scala.tools.nsc.{Global, Phase, plugins}
 import scala.util.control.NonFatal
 
 abstract class Mixins
-    extends plugins.PluginComponent {
+    extends plugins.PluginComponent
+    with Utils {
   val global: Global
   val scalazDefns: Definitions {val global: Mixins.this.global.type}
-
-  implicit final class Ops[A](val self: A) {
-    def opt[B](f: PartialFunction[A, B]): Option[B] = f.lift(self)
-  }
 
   val mixinPlugin = new global.analyzer.MacroPlugin {
     override def isActive(): Boolean =
