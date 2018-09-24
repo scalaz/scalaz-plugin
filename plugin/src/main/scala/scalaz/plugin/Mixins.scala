@@ -19,13 +19,13 @@ abstract class Mixins
 
     val state: mutable.ListMap[String, StatePart] = mutable.ListMap.empty
 
-    type TyParamSubstMap = Map[String, global.Type]
+    type TyParamSubstMap = Map[String, global.Symbol]
     type ValueParamSubstMap = Map[String, global.Symbol]
 
     case class StatePart(body: List[global.Tree], tyParamSyms: TyParamSubstMap, valueParamSyms: ValueParamSubstMap, oldAnonClass: global.Symbol) {
       def substitute(newTyParamSyms: TyParamSubstMap, newValueParamSyms: ValueParamSubstMap, newAnonClass: global.Symbol): List[global.Tree] = {
         val (oldTys, newTys) = tyParamSyms.map { case (k, v) =>
-          newTyParamSyms.get(k).map(ns => (v.typeSymbol.newTypeSkolem, ns.typeSymbol.newTypeSkolem))
+          newTyParamSyms.get(k).map(ns => (v.newTypeSkolem, ns.newTypeSkolem))
         }.toList.flatten.unzip
         val (oldVs, newVs) = valueParamSyms.map { case (k, v) =>
           newValueParamSyms.get(k).map(ns => (v, ns))
@@ -52,7 +52,7 @@ abstract class Mixins
 
     def extractInstanceTypeFromDeclType: global.Type => Option[(global.Type, TyParamSubstMap, ValueParamSubstMap)] = {
       case pt@global.PolyType(_, methTy: global.MethodType) =>
-        val tyParamsMap = pt.params.map(p => (p.name.toString, p.toType)).toMap
+        val tyParamsMap = pt.params.map(p => (p.name.toString, p)).toMap
         val valueParamsMap = methTy.params.map(p => (p.name.toString, p)).toMap
         Some((methTy.resultType, tyParamsMap, valueParamsMap))
       case methTy: global.MethodType =>
