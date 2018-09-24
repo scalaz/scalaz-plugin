@@ -37,7 +37,7 @@ abstract class Mixins
           val bd = b.duplicate
           bd
             .substituteSymbols(oldVs ++ oldTys ++ List(oldAnonClass, b.symbol), newVs ++ newTys ++ List(newAnonClass, bd.symbol))
-            .changeOwner(oldAnonClass -> newAnonClass) // b.symbol -> bd.symbol)
+            .changeOwner(oldAnonClass -> newAnonClass)
         }
       }
     }
