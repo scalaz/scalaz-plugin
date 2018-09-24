@@ -1,0 +1,6 @@
+orphans_non-typeclass-parents.scala:7: error: Typeclass instance declaration has some unrecognized parents:
+Blah
+
+  implicit val instance: Functor[Option] = new Functor[Option] with Blah { }
+                                               ^
+one error found
