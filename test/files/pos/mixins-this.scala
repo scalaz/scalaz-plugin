@@ -25,6 +25,9 @@ case class Identity[A](a: A)
 
   implicit def commutativeMonoid[A](implicit A: CommutativeMonoid[A]): CommutativeMonoid[Identity[A]] =
     new CommutativeMonoid[Identity[A]] {
-      def mempty2 = mempty
+      def mempty2 = {
+        this.mempty
+        mempty
+      }
     }
 }
