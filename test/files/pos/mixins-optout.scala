@@ -8,7 +8,7 @@ trait Monoid[A] extends Semigroup[A] {
   def mempty: A
 }
 
-@instances object Identity {
+@instances object IntInstances {
   @unmixin implicit val semigroup: Semigroup[Int] = new Semigroup[Int] {
     def mappend(fst: Int, snd: Int): Int = fst + snd
   }

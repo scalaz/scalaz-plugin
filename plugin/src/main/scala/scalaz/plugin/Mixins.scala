@@ -31,19 +31,27 @@ abstract class Mixins
           newValueParamSyms.get(k).map(ns => (v, ns))
         }.toList.flatten.unzip
         body.map { b =>
-          val bd = b.duplicate
-          bd
-            .substituteSymbols(oldVs ++ oldTys ++ List(oldAnonClass, b.symbol), newVs ++ newTys ++ List(newAnonClass, bd.symbol))
+          // substituteSymbols mutates the tree in place
+          b.duplicate
+            .substituteSymbols(
+              oldVs ++ oldTys ++ List(oldAnonClass),
+              newVs ++ newTys ++ List(newAnonClass)
+            )
             .changeOwner(oldAnonClass -> newAnonClass)
         }
       }
     }
 
     def isInstanceDecl(defn: global.ValOrDefDef): Boolean = {
-      val isTypeClassType = defn.symbol.info.baseTypeSeq.toList.contains[global.Type](scalazDefns.TypeclassType)
-      val isImplicit = defn.symbol.hasFlag(global.Flag.IMPLICIT)
+      // the last case is required to find backing `val`s
+      val realResultType = defn.symbol.info match {
+        case global.PolyType(_, methTy: global.MethodType) => methTy.resultType
+        case methTy: global.MethodType => methTy.resultType
+        case ty => ty
+      }
+      val isTypeClassType = realResultType.baseTypeSeq.toList.contains[global.Type](scalazDefns.TypeclassType)
       val isUnmixin = defn.symbol.hasAnnotation(scalazDefns.UnmixinAttr)
-      (isTypeClassType || isImplicit) && !isUnmixin
+      isTypeClassType && !isUnmixin
     }
 
     def instanceDecl: global.Tree => Option[global.ValOrDefDef] = _.opt {
@@ -103,7 +111,7 @@ abstract class Mixins
               "Type class instance definition is only allowed to contain `new InstanceType {<body>}`".errorAt(defn.pos)
             )
             (anonClass, newInstance) = t
-            // only safe once we know that `defn` is really a `DefDef`
+            // only safe once we know that `defn` is really a `DefDef` or `ValDef`
             (instanceTy, tySubstMap, valSubstMap) = extractInstanceTypeFromDeclType(defn.symbol.info)
             _ <- instanceTy match {
               case _: global.NoType.type => Left("Type class instance definition wasn't type checked? Report this".errorAt(defn.pos))
