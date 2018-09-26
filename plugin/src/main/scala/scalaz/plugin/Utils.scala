@@ -89,4 +89,15 @@ trait Utils {
   implicit final class Ops[A](val self: A) {
     def opt[B](f: PartialFunction[A, B]): Option[B] = f.lift(self)
   }
+
+  final case class LocatedError(pos: global.Position, msg: String)
+
+  implicit final class LocatedErrorOps(msg: String) {
+    def errorAt(pos: global.Position): LocatedError = LocatedError(pos, msg)
+  }
+
+  implicit final class OptionErrOps[A](opt: Option[A]) {
+    def orError[E](err: E): E Either A = opt.fold[E Either A](Left(err))(Right(_))
+  }
+
 }

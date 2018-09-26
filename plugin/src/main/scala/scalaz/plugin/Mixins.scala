@@ -7,6 +7,8 @@ import scala.tools.nsc.typechecker.AnalyzerPlugins
 import scala.tools.nsc.{Global, Phase, plugins}
 import scala.util.control.NonFatal
 
+import miniz._
+
 abstract class Mixins
     extends plugins.PluginComponent
     with Utils {
@@ -16,8 +18,6 @@ abstract class Mixins
   val mixinPlugin = new global.analyzer.MacroPlugin {
     override def isActive(): Boolean =
       global.phase.id < global.currentRun.picklerPhase.id
-
-    val state: mutable.ListMap[String, StatePart] = mutable.ListMap.empty
 
     type TyParamSubstMap = Map[String, global.Symbol]
     type ValueParamSubstMap = Map[String, global.Symbol]
@@ -39,26 +39,35 @@ abstract class Mixins
       }
     }
 
-    def instanceDecl: global.Tree => Option[global.DefDef] = _.opt {
-      case defdef: global.DefDef
-        if defdef.symbol.hasFlag(global.Flag.IMPLICIT) =>
-        defdef
+    def isInstanceDecl(defn: global.ValOrDefDef): Boolean = {
+      val isTypeClassType = defn.symbol.info.baseTypeSeq.toList.contains[global.Type](scalazDefns.TypeclassType)
+      val isImplicit = defn.symbol.hasFlag(global.Flag.IMPLICIT)
+      val isUnmixin = defn.symbol.hasAnnotation(scalazDefns.UnmixinAttr)
+      (isTypeClassType || isImplicit) && !isUnmixin
     }
 
-    def extractInstanceParts(defDef: global.DefDef): Option[(global.ClassDef, global.Tree)] = defDef.rhs.opt {
+    def instanceDecl: global.Tree => Option[global.ValOrDefDef] = _.opt {
+      case defn: global.ValOrDefDef if isInstanceDecl(defn) =>
+        defn
+    }
+
+    def extractInstanceParts(defn: global.ValOrDefDef): Option[(global.ClassDef, global.Tree)] = defn.rhs.opt {
       case global.Block(List(cld: global.ClassDef), instantiation) =>
         (cld, instantiation)
     }
 
-    def extractInstanceTypeFromDeclType: global.Type => Option[(global.Type, TyParamSubstMap, ValueParamSubstMap)] = {
+    def extractInstanceTypeFromDeclType: global.Type => (global.Type, TyParamSubstMap, ValueParamSubstMap) = {
       case pt@global.PolyType(_, methTy: global.MethodType) =>
         val tyParamsMap = pt.params.map(p => (p.name.toString, p)).toMap
         val valueParamsMap = methTy.params.map(p => (p.name.toString, p)).toMap
-        Some((methTy.resultType, tyParamsMap, valueParamsMap))
+        (methTy.resultType, tyParamsMap, valueParamsMap)
       case methTy: global.MethodType =>
         val valueParamsMap = methTy.params.map(p => (p.name.toString, p)).toMap
-        Some((methTy.resultType, Map.empty, valueParamsMap))
-      case _ => None
+        (methTy.resultType, Map.empty, valueParamsMap)
+      case nme: global.NullaryMethodType =>
+        (nme.resultType, Map.empty, Map.empty)
+      case ty =>
+        (ty, Map.empty, Map.empty)
     }
 
     def superClasses(tpe: global.Type): List[global.Type] = {
@@ -79,57 +88,81 @@ abstract class Mixins
 
     def removeInit(stats: List[global.Tree]): List[global.Tree] = {
       stats.filter {
-        case dd: global.DefDef => dd.name.toString != "<init>"
+        case dd: global.ValOrDefDef => dd.name.toString != "<init>"
         case _ => true
       }
     }
 
-    def expandTree(typer: global.analyzer.Typer, tr: global.Tree): global.Tree = {
-      val newTree = for {
-        defdef <- instanceDecl(tr)
-        (anonClass, newInstance) <- extractInstanceParts(defdef)
-        (instanceTy, tySubstMap, valSubstMap) <- extractInstanceTypeFromDeclType(defdef.symbol.info)
-        () <- instanceTy match {
-          case _: global.NoType.type => None
-          case _ => Some(())
-        }
-        scs = superClasses(instanceTy)
-        () <- if (state.contains(instanceTy.typeSymbol.name.toString)) {
-          None
-        } else {
-          state += (instanceTy.typeSymbol.name.toString -> StatePart(removeInit(anonClass.impl.body), tySubstMap, valSubstMap, anonClass.symbol))
-          Some(())
-        }
-        extraCode = listTraverseOption(scs)(t => state.get(t.typeSymbol.name.toString)).map {
-          _.flatMap(_.substitute(tySubstMap, valSubstMap, anonClass.symbol))
-        }
-        newTree = extraCode match {
-          case Some(code) if code.nonEmpty =>
-            global.deriveDefDef(defdef)(_ =>
-              global.Block(
-                List(
-                  global.deriveClassDef(
-                    anonClass
-                  )(_.copy(body = anonClass.impl.body ++ code))
-                ), newInstance
-              ).duplicate
+    def expandTree(state: mutable.ListMap[String, StatePart], typer: global.analyzer.Typer, tr: global.Tree): Either[LocatedError, global.Tree] = {
+      instanceDecl(tr) match {
+        case None =>
+          Right(tr)
+        case Some(defn) =>
+          for {
+            t <- extractInstanceParts(defn).orError(
+              "Type class instance definition is only allowed to contain `new InstanceType {<body>}`".errorAt(defn.pos)
             )
-          case _ =>
-            tr
-        }
-      } yield newTree
-      newTree match {
-        case None => tr
-        case Some(nt) =>
-          typer.context.owner.info.decls.unlink(tr.symbol)
-          typer.namer.enterSym(nt)
-          nt
+            (anonClass, newInstance) = t
+            // only safe once we know that `defn` is really a `DefDef`
+            (instanceTy, tySubstMap, valSubstMap) = extractInstanceTypeFromDeclType(defn.symbol.info)
+            _ <- instanceTy match {
+              case _: global.NoType.type => Left("Type class instance definition wasn't type checked? Report this".errorAt(defn.pos))
+              case _ => Right(())
+            }
+            scs = superClasses(instanceTy)
+            _ <- if (state.contains(instanceTy.typeSymbol.name.toString)) {
+              Left("Only one instance in an @instances object is allowed per type class.".errorAt(defn.pos))
+            } else {
+              state += (instanceTy.typeSymbol.name.toString -> StatePart(removeInit(anonClass.impl.body), tySubstMap, valSubstMap, anonClass.symbol))
+              Right(())
+            }
+            extraCode = listTraverseOption(scs)(t => state.get(t.typeSymbol.name.toString)).map {
+              _.flatMap(_.substitute(tySubstMap, valSubstMap, anonClass.symbol))
+            }
+            newTree <- extraCode match {
+              case Some(Nil) => Right(tr)
+              case Some(code) =>
+                val newBody = global.Block(
+                    List(
+                      global.deriveClassDef(
+                        anonClass
+                      )(_.copy(body = anonClass.impl.body ++ code))
+                    ), newInstance
+                  ).duplicate
+                if (defn.isInstanceOf[global.DefDef])
+                  Right(global.deriveDefDef(defn)(_ =>
+                    newBody
+                  ))
+                else
+                  Right(global.deriveValDef(defn)(_ =>
+                    newBody
+                  ))
+              case None =>
+                val missingClasses = scs.map(_.typeSymbol.name.toString).toSet -- state.keySet
+                Left(s"A type class instance is missing instances of its parent classes: ${missingClasses.mkString(",")}".errorAt(defn.pos))
+            }
+          } yield {
+            newTree
+          }
       }
     }
 
     override def pluginsEnterStats(typer: global.analyzer.Typer, stats: List[global.Tree]): List[global.Tree] = {
       if (typer.context.owner.hasAnnotation(scalazDefns.InstancesAttr)) {
-        stats.map(expandTree(typer, _))
+        val state: mutable.ListMap[String, StatePart] = mutable.ListMap.empty
+        stats.map(o => expandTree(state, typer, o).map(n => (o, n))).uncozip.fold({ es =>
+          es.foreach {
+            case LocatedError(pos, msg) =>
+              global.reporter.error(pos, msg)
+          }
+          stats
+        }, { ts => ts.foreach { case (o, n) =>
+          if (o ne n) {
+            typer.context.owner.info.decls.unlink(o.symbol)
+            typer.namer.enterSym(n)
+          }
+          n
+        }; ts.map(_._2) })
       } else {
         stats
       }

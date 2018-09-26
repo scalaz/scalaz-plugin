@@ -13,6 +13,8 @@ class minimal(defns: Any*) extends StaticAnnotation
 
 class instances extends StaticAnnotation
 
+class unmixin extends StaticAnnotation
+
 object features {
   @scala.annotation.meta.languageFeature("enable orphan instances", enableRequired = true)
   sealed trait orphans
