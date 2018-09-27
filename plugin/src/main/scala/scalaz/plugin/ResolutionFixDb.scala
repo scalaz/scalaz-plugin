@@ -12,7 +12,7 @@ object ResolutionFixDb {
     add(
       "scala.tools.nsc.doc.DocFactory$compiler$",
       "scala.tools.nsc.doc.ScaladocGlobal$$anon$1",
-        """_root_/analyzer@scala.tools.nsc.doc.ScaladocGlobal
+      """_root_/analyzer@scala.tools.nsc.doc.ScaladocGlobal
           |_root_/lastSeenContext@scala.tools.nsc.Global/$outer@scala.tools.nsc.typechecker.Contexts$Context
           |_old_/namerFactory$module@scala.tools.nsc.doc.ScaladocGlobal$$anon$1/$outer@scala.tools.nsc.typechecker.Analyzer$namerFactory$
           |_old_/typerFactory$module@scala.tools.nsc.doc.ScaladocGlobal$$anon$1/$outer@scala.tools.nsc.typechecker.Analyzer$typerFactory$
@@ -24,7 +24,7 @@ object ResolutionFixDb {
     add(
       "xsbt.ZincCompiler",
       "scala.tools.nsc.Global$$anon$1",
-        """_root_/analyzer@scala.tools.nsc.Global
+      """_root_/analyzer@scala.tools.nsc.Global
           |_root_/delambdafy$module@scala.tools.nsc.Global/analyzer@scala.tools.nsc.transform.Delambdafy
           |_root_/lastSeenContext@scala.tools.nsc.Global/$outer@scala.tools.nsc.typechecker.Contexts$Context
           |_old_/namerFactory$module@scala.tools.nsc.Global$$anon$1/$outer@scala.tools.nsc.typechecker.Analyzer$namerFactory$
@@ -37,7 +37,7 @@ object ResolutionFixDb {
     add(
       "scala.tools.nsc.Global",
       "scala.tools.nsc.Global$$anon$1",
-        """_root_/analyzer@scala.tools.nsc.Global
+      """_root_/analyzer@scala.tools.nsc.Global
           |_root_/delambdafy$module@scala.tools.nsc.Global/analyzer@scala.tools.nsc.transform.Delambdafy
           |_root_/lastSeenContext@scala.tools.nsc.Global/$outer@scala.tools.nsc.typechecker.Contexts$Context
           |_old_/namerFactory$module@scala.tools.nsc.Global$$anon$1/$outer@scala.tools.nsc.typechecker.Analyzer$namerFactory$
