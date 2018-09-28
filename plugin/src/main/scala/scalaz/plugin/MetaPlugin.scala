@@ -57,7 +57,7 @@ class MetaPlugin(val global: Global) extends Plugin { plugin =>
     "-minimal" -> sufficiency,
     "-orphans" -> orphanChecker,
     "+polyopt" -> polymorphicFunctionOptimizer,
-    "+mixins" -> mixins
+    "+mixins"  -> mixins
   ).flatMap {
     case (opt, phf) if opt.startsWith("-") =>
       if (options.contains(opt)) None else Some(phf)
