@@ -6,7 +6,7 @@ cancelable in Global := true
 
 inThisBuild(
   List(
-    crossScalaVersions := List("2.12.6", "2.12.4"),
+    crossScalaVersions := List("2.12.7", "2.12.6", "2.12.4"),
     organization := "org.scalaz",
     homepage := Some(url("https://github.com/scalaz/scalaz-plugin")),
     licenses := List("LGPL 3.0" -> url("https://www.gnu.org/licenses/lgpl-3.0.en.html")),

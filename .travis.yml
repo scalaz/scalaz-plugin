@@ -3,7 +3,7 @@ language: scala
 sudo: false
 
 scala:
-- 2.12.6
+- 2.12.7
 
 jdk:
 - oraclejdk8
@@ -70,6 +70,9 @@ jobs:
     - <<: *build
       scala: 2.12.4
       name: "Build with 2.12.4"
+    - <<: *build
+      scala: 2.12.6
+      name: "Build with 2.12.6"
 
 cache:
   directories:
