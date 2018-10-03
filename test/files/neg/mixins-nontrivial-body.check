@@ -1,0 +1,4 @@
+mixins-nontrivial-body.scala:8: error: Type class instance definition is only allowed to contain `new InstanceType {<body>}`
+  implicit def f1[A]: F[Identity[A]] = {
+               ^
+one error found

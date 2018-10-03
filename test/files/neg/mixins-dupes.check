@@ -1,0 +1,7 @@
+mixins-dupes.scala:13: error: Only one instance in an @instances object is allowed per type class.
+  implicit def f2[A]: F[Identity[A]] =
+               ^
+mixins-dupes.scala:16: error: Only one instance in an @instances object is allowed per type class.
+  implicit def f3[A]: F[Identity[A]] =
+               ^
+two errors found
