@@ -218,7 +218,7 @@ abstract class Mixins extends plugins.PluginComponent with Utils {
 
   override val phaseName: String        = "scalaz-mixins"
   override val runsAfter: List[String]  = "namer" :: Nil
-  override val runsBefore: List[String] = Nil
+  override val runsBefore: List[String] = "superaccessors" :: Nil
 
   override def newPhase(prev: scala.tools.nsc.Phase): StdPhase = new StdPhase(prev) {
     def apply(unit: global.CompilationUnit): Unit = ()
