@@ -118,7 +118,7 @@ abstract class Mixins extends plugins.PluginComponent with Utils {
             t <- extractInstanceParts(defn).orError(
                   "Type class instance definition is only allowed to contain `new InstanceType {<body>}`"
                     .errorAt(defn.pos)
-                 )
+                )
             (anonClass, newInstance) = t
             // only safe once we know that `defn` is really a `DefDef` or `ValDef`
             (instanceTy, tySubstMap, valSubstMap) = extractInstanceTypeFromDeclType(
