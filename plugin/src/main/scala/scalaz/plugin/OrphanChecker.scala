@@ -148,7 +148,7 @@ abstract class OrphanChecker
           }
         }
 
-      case cd @ ClassDef(mods, _, _, Template(parents, _, _)) if cd.symbol.tpe <:< TypeclassType =>
+      case cd @ ClassDef(_, _, _, Template(parents, _, _)) if cd.symbol.tpe <:< TypeclassType =>
         val sym = cd.symbol
         if (sym.isClass && !sym.isAbstract) {
           validateInstanceDeclaration(cd.pos, sym, parents)

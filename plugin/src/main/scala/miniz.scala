@@ -114,5 +114,13 @@ object `package` {
   implicit class ToExtraListEitherOps[E, A](val list: List[Either[E, A]]) extends AnyVal {
     def separate: (List[E], List[A]) =
       (list.flatMap(_.left.toOption), list.flatMap(_.right.toOption))
+    // left-biased
+    def uncozip: List[E] Either List[A] =
+      separate match {
+        case (Nil, bs) =>
+          Right(bs)
+        case (es, _) =>
+          Left(es)
+      }
   }
 }

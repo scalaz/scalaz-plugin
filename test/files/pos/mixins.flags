@@ -1,0 +1,1 @@
+-P:scalaz-plugin:+mixins -Ydebug -Ylog:typer -uniqid

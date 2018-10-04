@@ -83,11 +83,21 @@ trait Utils {
       m.typeParams.nonEmpty && m.paramLists.isEmpty
     } else false
 
-  /**
-   *
-   * @param tmpl
-   * @return
-   */
   def collectParameterlessPolymorphicMethods(tmpl: Template): List[MethodSymbol] =
     tmpl.body.map(_.symbol).filter(isParameterlessPolymorphicMethod).map(_.asMethod)
+
+  implicit final class Ops[A](val self: A) {
+    def opt[B](f: PartialFunction[A, B]): Option[B] = f.lift(self)
+  }
+
+  final case class LocatedError(pos: global.Position, msg: String)
+
+  implicit final class LocatedErrorOps(msg: String) {
+    def errorAt(pos: global.Position): LocatedError = LocatedError(pos, msg)
+  }
+
+  implicit final class OptionErrOps[A](opt: Option[A]) {
+    def orError[E](err: E): E Either A = opt.fold[E Either A](Left(err))(Right(_))
+  }
+
 }

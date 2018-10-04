@@ -1,0 +1,4 @@
+mixins-no-parent.scala:14: error: A type class instance is missing instances of its parent classes: G,F
+  implicit def h[A]: H[Identity[A]] =
+               ^
+one error found
