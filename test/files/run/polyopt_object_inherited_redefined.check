@@ -1,7 +1,17 @@
+(scala.tools.nsc.Global,scala.tools.nsc.Global$$anon$4)
+_root_/analyzer@scala.tools.nsc.Global
+_root_/delambdafy$module@scala.tools.nsc.Global/analyzer@scala.tools.nsc.transform.Delambdafy
+_root_/lastSeenContext@scala.tools.nsc.Global/$outer@scala.tools.nsc.typechecker.Contexts$Context
+_old_/namerFactory$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Analyzer$namerFactory$
+_old_/typerFactory$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Analyzer$typerFactory$
+_old_/NoImplicitInfo@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Implicits$ImplicitInfo
+_old_/NoContext$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Contexts$Context
+_old_/Context$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Contexts$Context$
+_root_/lastSeenContext@scala.tools.nsc.Global/scala$tools$nsc$typechecker$Contexts$Context$$_reporter@scala.tools.nsc.typechecker.Contexts$Context/$outer@scala.tools.nsc.typechecker.Contexts$ContextReporter
 // class version 52.0 (52)
 // access flags 0x31
 // signature LParent<Ljava/lang/String;>;
-// declaration: Child$ extends Parent<java.lang.String>
+// declaration:  extends Parent<java.lang.String>
 public final class Child$ extends Parent  {
 
   // compiled from: newSource1.scala
@@ -15,7 +25,7 @@ public final class Child$ extends Parent  {
 
   // access flags 0x11
   // signature LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String>
+  // declaration:  extends Foo<java.lang.String>
   public final LFoo; local$1
 
   // access flags 0x9
@@ -28,7 +38,7 @@ public final class Child$ extends Parent  {
 
   // access flags 0x1
   // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/String;>;
-  // declaration: Foo<java.lang.String> someFunc<X>()
+  // declaration: Foo<java.lang.String> <X>()
   public someFunc()LFoo;
    L0
     ALOAD 0
