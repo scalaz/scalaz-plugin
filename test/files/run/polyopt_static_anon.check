@@ -1,7 +1,17 @@
+(scala.tools.nsc.Global,scala.tools.nsc.Global$$anon$4)
+_root_/analyzer@scala.tools.nsc.Global
+_root_/delambdafy$module@scala.tools.nsc.Global/analyzer@scala.tools.nsc.transform.Delambdafy
+_root_/lastSeenContext@scala.tools.nsc.Global/$outer@scala.tools.nsc.typechecker.Contexts$Context
+_old_/namerFactory$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Analyzer$namerFactory$
+_old_/typerFactory$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Analyzer$typerFactory$
+_old_/NoImplicitInfo@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Implicits$ImplicitInfo
+_old_/NoContext$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Contexts$Context
+_old_/Context$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Contexts$Context$
+_root_/lastSeenContext@scala.tools.nsc.Global/scala$tools$nsc$typechecker$Contexts$Context$$_reporter@scala.tools.nsc.typechecker.Contexts$Context/$outer@scala.tools.nsc.typechecker.Contexts$ContextReporter
 // class version 52.0 (52)
 // access flags 0x31
 // signature LParent<Ljava/lang/String;>;
-// declaration: TestStatic$$anon$1 extends Parent<java.lang.String>
+// declaration:  extends Parent<java.lang.String>
 public final class TestStatic$$anon$1 extends Parent  {
 
   // compiled from: newSource1.scala
@@ -20,7 +30,7 @@ public final class TestStatic$$anon$1 extends Parent  {
 
   // access flags 0x11
   // signature LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object>
+  // declaration:  extends Foo<java.lang.Object>
   public final LFoo; local$1
 
   // access flags 0x1
@@ -37,7 +47,7 @@ public final class TestStatic$$anon$1 extends Parent  {
 
   // access flags 0x11
   // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object> someFunc<X>()
+  // declaration: Foo<java.lang.Object> <X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 10 L0
@@ -76,7 +86,7 @@ public final class TestStatic$$anon$1 extends Parent  {
 // class version 52.0 (52)
 // access flags 0x31
 // signature LParent<Ljava/lang/String;>;
-// declaration: TestStatic$$anon$2 extends Parent<java.lang.String>
+// declaration:  extends Parent<java.lang.String>
 public final class TestStatic$$anon$2 extends Parent  {
 
   // compiled from: newSource1.scala
@@ -92,12 +102,12 @@ public final class TestStatic$$anon$2 extends Parent  {
 
   // access flags 0x11
   // signature LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object>
+  // declaration:  extends Foo<java.lang.Object>
   public final LFoo; local$2
 
   // access flags 0x11
   // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object> someFunc<X>()
+  // declaration: Foo<java.lang.Object> <X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 13 L0
@@ -129,7 +139,7 @@ public final class TestStatic$$anon$2 extends Parent  {
 // class version 52.0 (52)
 // access flags 0x31
 // signature LParent<Ljava/lang/String;>;
-// declaration: TestStatic$$anon$3 extends Parent<java.lang.String>
+// declaration:  extends Parent<java.lang.String>
 public final class TestStatic$$anon$3 extends Parent  {
 
   // compiled from: newSource1.scala
@@ -143,12 +153,12 @@ public final class TestStatic$$anon$3 extends Parent  {
 
   // access flags 0x11
   // signature LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object>
+  // declaration:  extends Foo<java.lang.Object>
   public final LFoo; local$3
 
   // access flags 0x11
   // signature <X:Ljava/lang/Object;>()LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object> someFunc<X>()
+  // declaration: Foo<java.lang.Object> <X>()
   public final someFunc()LFoo;
    L0
     LINENUMBER 17 L0

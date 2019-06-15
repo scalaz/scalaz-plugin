@@ -1,3 +1,13 @@
+(scala.tools.nsc.Global,scala.tools.nsc.Global$$anon$4)
+_root_/analyzer@scala.tools.nsc.Global
+_root_/delambdafy$module@scala.tools.nsc.Global/analyzer@scala.tools.nsc.transform.Delambdafy
+_root_/lastSeenContext@scala.tools.nsc.Global/$outer@scala.tools.nsc.typechecker.Contexts$Context
+_old_/namerFactory$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Analyzer$namerFactory$
+_old_/typerFactory$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Analyzer$typerFactory$
+_old_/NoImplicitInfo@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Implicits$ImplicitInfo
+_old_/NoContext$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Contexts$Context
+_old_/Context$module@scala.tools.nsc.Global$$anon$4/$outer@scala.tools.nsc.typechecker.Contexts$Context$
+_root_/lastSeenContext@scala.tools.nsc.Global/scala$tools$nsc$typechecker$Contexts$Context$$_reporter@scala.tools.nsc.typechecker.Contexts$Context/$outer@scala.tools.nsc.typechecker.Contexts$ContextReporter
 // class version 52.0 (52)
 // access flags 0x31
 public final class FooBar$ {
@@ -16,7 +26,7 @@ public final class FooBar$ {
 
   // access flags 0x11
   // signature LFoo<Ljava/lang/Object;>;
-  // declaration: Foo<java.lang.Object>
+  // declaration:  extends Foo<java.lang.Object>
   public final LFoo; local$1
 
   // access flags 0x9
@@ -41,7 +51,7 @@ public final class FooBar$ {
 
   // access flags 0x1
   // signature <A:Ljava/lang/Object;>()LFoo<TA;>;
-  // declaration: Foo<A> get<A>()
+  // declaration: Foo<A> <A>()
   public get()LFoo;
    L0
     ALOAD 0
@@ -54,7 +64,7 @@ public final class FooBar$ {
 
   // access flags 0x1
   // signature <A:Ljava/lang/Object;>(TA;)Lscala/collection/immutable/List<TA;>;
-  // declaration: scala.collection.immutable.List<A> get1<A>(A)
+  // declaration: scala.collection.immutable.List<A> <A>(A)
   public get1(Ljava/lang/Object;)Lscala/collection/immutable/List;
     // parameter final  a
    L0
